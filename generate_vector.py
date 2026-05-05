@@ -16,9 +16,7 @@ from behaviors import (
     get_vector_path,
 )
 from datasets import load_from_disk
-from utils.mwrapper_map import (
-    model_to_wrapper_map
-)
+from utils.helpers import get_model_to_wrapper_map
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -180,7 +178,7 @@ def generate_save_vectors(
 if __name__ == "__main__":
     
     args = parse_args()
-    wrapper = model_to_wrapper_map[args.model_name]["8b"]
+    wrapper = get_model_to_wrapper_map()[args.model_name]["8b"]
     generate_save_vectors(
         args.layers,
         wrapper,

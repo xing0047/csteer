@@ -1,6 +1,10 @@
 import torch as t
 import matplotlib.pyplot as plt
-from .mpath_map import model_to_path_map
+
+_MODEL_PATHS = {
+    "internvl3_5": {"8b": "../MODEL/InternVL3_5-8B"},
+    "qwen3vl": {"8b": "../MODEL/Qwen3-VL-8B-Instruct"},
+}
 
 
 def set_plotting_settings():
@@ -82,4 +86,25 @@ def make_tensor_save_suffix(layer, model_name, model_size):
 
 
 def get_model_path(model_name: str, model_size: str):
-    return model_to_path_map[model_name][model_size]
+    return _MODEL_PATHS[model_name][model_size]
+
+
+_model_to_wrapper_map = None
+
+
+def get_model_to_wrapper_map():
+    """Lazily built so wrappers.* can import utils.helpers without a cycle."""
+    global _model_to_wrapper_map
+    if _model_to_wrapper_map is None:
+        from wrappers.internvl3_5_wrapper import InternVL3_5_Wrapper
+        from wrappers.qwen3vl_wrapper import Qwen3VL_Wrapper
+        from wrappers.openai_wrapper import OpenAIWrapper
+
+        _model_to_wrapper_map = {
+            "internvl3_5": {"8b": InternVL3_5_Wrapper},
+            "qwen3vl": {"8b": Qwen3VL_Wrapper},
+            "gpt-4o": OpenAIWrapper,
+            "gemini-2.5-pro": OpenAIWrapper,
+            "o3": OpenAIWrapper,
+        }
+    return _model_to_wrapper_map

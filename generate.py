@@ -15,7 +15,7 @@ from utils.internvl_utils import (
     load_image as internvl_load_image,
     load_frames as internvl_load_frames,
 )
-from utils.mpath_map import model_to_path_map
+from utils.helpers import get_model_path
 from utils.conversation import (
     INST_IT_IMAGE_SYSTEM_PROMPT,
     INST_IT_VIDEO_SYSTEM_PROMPT,
@@ -52,7 +52,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    path = model_to_path_map[args.model_name]["8b"]
+    path = get_model_path(args.model_name, "8b")
 
     # Generation Config
     generation_config = dict(

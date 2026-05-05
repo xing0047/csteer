@@ -30,9 +30,7 @@ from behaviors import (
     get_results_dir,
     ALL_BEHAVIORS,
 )
-from utils.mwrapper_map import (
-    model_to_wrapper_map
-)
+from utils.helpers import get_model_to_wrapper_map
 from utils.tokenize import (
     ADD_FROM_POS_CHAT, 
 )
@@ -432,6 +430,7 @@ def test_steering(
     Returns a list of per-sample inference failures (not written to json/jsonl; safe to retry with --resume).
     """
     failures: List[Dict[str, Any]] = []
+    model_to_wrapper_map = get_model_to_wrapper_map()
     is_api_model = model_name in API_MODELS
     # Keep JSON filename schema unchanged (judge scripts rely on it),
     # but separate baseline/no-refer results by output directory.

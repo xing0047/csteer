@@ -53,7 +53,7 @@ from evaluate_inst_it import (
     load_inst_it_video_oe_ground_truth,
     process_oe_json_file,
 )
-from eval_suite import (
+from eval_outputs import (
     eval_blink_subset,
     eval_cvbench,
     eval_vip_bbox_lmdeploy,

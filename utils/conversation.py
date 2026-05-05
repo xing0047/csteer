@@ -36,7 +36,6 @@ class SeparatorStyle(IntEnum):
     NO_COLON_SINGLE = auto()
     NO_COLON_TWO = auto()
     ADD_NEW_LINE_SINGLE = auto()
-    LLAMA2 = auto()
     CHATGLM = auto()
     CHATML = auto()
     CHATINTERN = auto()
@@ -140,22 +139,6 @@ class Conversation:
                     ret += '\n\n'
                 else:
                     ret += role + ':'
-            return ret
-        elif self.sep_style == SeparatorStyle.LLAMA2:
-            seps = [self.sep, self.sep2]
-            if self.system_message:
-                ret = system_prompt
-            else:
-                ret = '[INST] '
-            for i, (role, message) in enumerate(self.messages):
-                tag = self.roles[i % 2]
-                if message:
-                    if i == 0:
-                        ret += message + ' '
-                    else:
-                        ret += tag + ' ' + message + seps[i % 2]
-                else:
-                    ret += tag
             return ret
         elif self.sep_style == SeparatorStyle.CHATGLM:
             # source: https://huggingface.co/THUDM/chatglm-6b/blob/1d240ba371910e9282298d4592532d7f0f3e9f3e/modeling_chatglm.py#L1302-L1308
@@ -344,6 +327,8 @@ def register_conv_template(template: Conversation, override: bool = False):
 
 def get_conv_template(name: str) -> Conversation:
     """Get a conversation template."""
+    if name == "internvl2_5":
+        name = "internvl3_5"
     return conv_templates[name].copy()
 
 
@@ -396,7 +381,7 @@ register_conv_template(
 
 register_conv_template(
     Conversation(
-        name='internvl2_5',
+        name='internvl3_5',
         system_template='<|im_start|>system\n{system_message}',
         system_message='你是书生·万象，英文名是InternVL，是由上海人工智能实验室、清华大学及多家合作单位联合开发的多模态大语言模型。',
         roles=('<|im_start|>user\n', '<|im_start|>assistant\n'),

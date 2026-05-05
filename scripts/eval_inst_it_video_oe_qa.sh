@@ -1,5 +1,5 @@
-model_name=${1:-"internvl3"}
-model_size=${2:-"2b"}
+model_name=${1:-"internvl3_5"}
+model_size=${2:-"8b"}
 n_layers=${3:-28}
 type=${4:-"inst_it_video_oe_qa"}
 

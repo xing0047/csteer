@@ -1,5 +1,5 @@
-model_name=${1:-"internvl3"}
-model_size=${2:-"2b"}
+model_name=${1:-"internvl3_5"}
+model_size=${2:-"8b"}
 n_layers=${3:-28}
 type=${4:-"inst_it_video_mc_qa"}
 
@@ -37,16 +37,6 @@ python prompting_with_steering.py \
 #     --model_size ${model_size} \
 #     --layers $(seq 0 $((n_layers-1))) \
 #     --multipliers 1 
-
-# Plot PCA of constrastive activations
-# ? python plot_activations.py --behaviors sycophancy --layers $(seq 0 31) --model_size "7b"
-
-# Plot results of CAA steering effect
-# ? python plot_results.py --layers $(seq 0 31) --multipliers 1 --type ab
-# ? python plot_results.py --layers $(seq 0 31) --multipliers -1 0 1 --behaviors sycophancy --type ab
-
-# Finetune a llama on a behavioral dataset using supervised finetuning on the A/B tokens
-# ? python finetune_llama.py --behavior sycophancy --direction pos
 
 # Plot similarites of steering vectors
 # ? python analyze_vectors.py

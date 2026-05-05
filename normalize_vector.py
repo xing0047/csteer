@@ -33,10 +33,7 @@ def normalize_vectors(model_name: str, model_size: str, vector_suffix: str, laye
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model_name", type=str, choices=["internvl3", "internvl3_5", "qwen3vl"]
-    )
-    parser.add_argument(
-        "--model_size", type=str, choices=["2b", "8b", "32b", "38b"]
+        "--model_name", type=str, choices=["internvl3_5", "qwen3vl"]
     )
     parser.add_argument(
         "--vector_suffix", type=str, required=True
@@ -45,5 +42,5 @@ if __name__ == "__main__":
         "--layers", nargs="+", type=int, default=list(range(28))
     )
     args = parser.parse_args()
-    normalize_vectors(args.model_name, args.model_size, args.vector_suffix, args.layers)
+    normalize_vectors(args.model_name, "8b", args.vector_suffix, args.layers)
     print(f"Vectors saved locally to: ../NORMALIZED_VECTORS")

@@ -1,4 +1,4 @@
-# Steering Llama 2 with Contrastive Activation Addition
+# csteer — contrastive activation steering for VLMs
 
 ## Setup
 
@@ -11,7 +11,7 @@ pip install -r requirements.txt
 Then create a `.env` file with the following variables (see `.env.example`):
 
 ```
-HF_TOKEN=huggingface_token_with_access_to_llama2
+HF_TOKEN=your_huggingface_token
 OPEN_AI_KEY=openai_api_key_with_access_to_gpt4
 ```
 

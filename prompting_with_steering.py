@@ -2,12 +2,11 @@
 Use CAA to steer the model
 
 Usage:
-python prompting_with_steering.py --behaviors refer --layers 10 --multipliers 0.1 0.5 1 2 5 10 --type ab --use_base_model --model_size 7b
+python prompting_with_steering.py --behaviors refer --layers 10 --multipliers 0.1 0.5 1 2 5 10 --type ab --use_base_model --model_size 8b
 """
 
 import json
 import hashlib
-from utils.wrappers.internvl3_wrapper import InternVL3_Wrapper
 import os
 import argparse
 import torch as t
@@ -133,7 +132,7 @@ def _load_existing_results_for_resume(save_filename: str) -> tuple[list, set]:
 
 def process_item_vip_image_oe_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
     verbose: bool = False,
     in_query: bool = False,
@@ -158,7 +157,7 @@ def process_item_vip_image_oe_qa(
 
 def process_item_dlc_bench_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
 ) -> Dict[str, str]:
     raise NotImplementedError
@@ -245,7 +244,7 @@ def process_item_cvbench_image_mc_qa(
 
 def process_item_inst_it_image_mc_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
     verbose=False,
     in_query: bool = False,
@@ -272,7 +271,7 @@ def process_item_inst_it_image_mc_qa(
 
 def process_item_inst_it_image_oe_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
     in_query: bool = False,
     marker_only: bool = False,
@@ -295,7 +294,7 @@ def process_item_inst_it_image_oe_qa(
 
 def process_item_inst_it_video_mc_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
     verbose=False,
     in_query: bool = False,
@@ -318,7 +317,7 @@ def process_item_inst_it_video_mc_qa(
 
 def process_item_inst_it_video_oe_qa(
     item: Dict[str, str],
-    model: InternVL3_Wrapper,
+    model: Any,
     system_prompt: Optional[str],
     verbose=False,
     in_query: bool = False,
@@ -431,7 +430,7 @@ def test_steering(
     settings: SteeringSettings, 
     overwrite: bool = False, 
     resume: bool = False,
-    model_name: str = 'internvl3', 
+    model_name: str = 'internvl3_5', 
     model_size: str = '8b',
     vector_dir: str = '',
     output_dir: str = '',
@@ -697,8 +696,8 @@ if __name__ == "__main__":
             "gar_image_detail_oe_qa",
         ],
     )
-    parser.add_argument("--model_name", type=str, choices=["internvl3", "internvl3_5", "qwen3vl", "gpt-4o", "gemini-2.5-pro", "o3"], required=True)
-    parser.add_argument("--model_size", type=str, choices=["2b", "8b", "32b", "38b"])
+    parser.add_argument("--model_name", type=str, choices=["internvl3_5", "qwen3vl", "gpt-4o", "gemini-2.5-pro", "o3"], required=True)
+    parser.add_argument("--model_size", type=str, default="8b", choices=["8b"])
     parser.add_argument("--vector_dir", type=str, default="inst_it_image_mo_dev")
     parser.add_argument("--output_dir", type=str, default="inst_it_image_mo_dev")
     parser.add_argument('--use_flash_attn', action='store_true', help="enable flash attention")
@@ -732,8 +731,7 @@ if __name__ == "__main__":
         assert args.multipliers is not None and len(args.multipliers) == 1, "--noref requires exactly one --multipliers value"
         assert abs(float(args.multipliers[0]) - 0.0) < 1e-6, "--noref requires --multipliers 0.0"
     if is_api_model:
-        if args.model_size is None:
-            args.model_size = "api"
+        args.model_size = "api"
         if args.layers is None:
             args.layers = [0]
         if args.multipliers is None:

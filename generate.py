@@ -24,10 +24,7 @@ from utils.conversation import (
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--model_name', required=True, choices=['internvl3', 'internvl3_5', 'qwen3vl']
-    )
-    parser.add_argument(
-        '--model_size', required=True, choices=['2b', '8b', '32b', '38b']
+        '--model_name', required=True, choices=['internvl3_5', 'qwen3vl']
     )
     parser.add_argument(
         '--data', type=str, default='inst_it_image', choices=['refcocog', 'inst_it_image', 'inst_it_video']
@@ -55,7 +52,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    path = model_to_path_map[args.model_name][args.model_size]
+    path = model_to_path_map[args.model_name]["8b"]
 
     # Generation Config
     generation_config = dict(
@@ -63,51 +60,13 @@ def main():
     )
 
     # Load Model
-    if args.model_name == 'internvl3' or args.model_name == 'internvl3_5':
-        if args.model_size == '2b' or args.model_size == '8b':
-            model = AutoModel.from_pretrained(
-                path,
-                torch_dtype=torch.bfloat16,
-                low_cpu_mem_usage=True,
-                use_flash_attn=args.use_flash_attn,
-                trust_remote_code=True).eval().cuda()
-        elif args.model_size == '38b':
-            import math
-            from transformers import AutoConfig
-            def split_model(model_name):
-                device_map = {}
-                world_size = torch.cuda.device_count()
-                config = AutoConfig.from_pretrained(path, trust_remote_code=True)
-                num_layers = config.llm_config.num_hidden_layers
-                # Since the first GPU will be used for ViT, treat it as half a GPU.
-                num_layers_per_gpu = math.ceil(num_layers / (world_size - 0.5))
-                num_layers_per_gpu = [num_layers_per_gpu] * world_size
-                num_layers_per_gpu[0] = math.ceil(num_layers_per_gpu[0] * 0.5)
-                layer_cnt = 0
-                for i, num_layer in enumerate(num_layers_per_gpu):
-                    for j in range(num_layer):
-                        device_map[f'language_model.model.layers.{layer_cnt}'] = i
-                        layer_cnt += 1
-                device_map['vision_model'] = 0
-                device_map['mlp1'] = 0
-                device_map['language_model.model.tok_embeddings'] = 0
-                device_map['language_model.model.embed_tokens'] = 0
-                device_map['language_model.output'] = 0
-                device_map['language_model.model.norm'] = 0
-                device_map['language_model.model.rotary_emb'] = 0
-                device_map['language_model.lm_head'] = 0
-                device_map[f'language_model.model.layers.{num_layers - 1}'] = 0
-                return device_map
-            device_map = split_model('InternVL3-38B')
-            model = AutoModel.from_pretrained(
-                path,
-                torch_dtype=torch.bfloat16,
-                low_cpu_mem_usage=True,
-                use_flash_attn=args.use_flash_attn,
-                trust_remote_code=True,
-                device_map=device_map).eval()
-        else:
-            raise ValueError(f'No {args.model_name}_{args.model_size}')
+    if args.model_name == 'internvl3_5':
+        model = AutoModel.from_pretrained(
+            path,
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            use_flash_attn=args.use_flash_attn,
+            trust_remote_code=True).eval().cuda()
         tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True, use_fast=False)
     elif args.model_name == 'qwen3vl':
         model = Qwen3VLForConditionalGeneration.from_pretrained(
@@ -122,7 +81,7 @@ def main():
         )
         tokenizer = AutoTokenizer.from_pretrained(path, use_fast=False)
     else:
-        raise ValueError(f'No {args.model_name}_{args.model_size}')
+        raise ValueError(f'Unsupported model_name {args.model_name}')
 
     # Load Data
     if args.data == "refcocog":
@@ -173,7 +132,7 @@ def main():
         else:
             raise ValueError(f'No {args.data}')
         
-        if args.model_name == 'internvl3_5' or args.model_name == 'internvl3':
+        if args.model_name == 'internvl3_5':
             if args.data == "inst_it_image":
                 pixel_values = internvl_load_image(image_path).to(torch.bfloat16).cuda()
                 question = INST_IT_IMAGE_SYSTEM_PROMPT.strip() + "\n<image>\nPlease describe the whole image with IDs."
@@ -250,7 +209,7 @@ def main():
     # Save
     ds = Dataset.from_dict(data_dict)
     os.makedirs(args.output_dir, exist_ok=True)
-    save_path = os.path.join(args.output_dir, f"{args.hf_user}_{args.model_name}_{args.model_size}_{args.data}_n{args.n_pairs}")
+    save_path = os.path.join(args.output_dir, f"{args.hf_user}_{args.model_name}_8b_{args.data}_n{args.n_pairs}")
     ds.save_to_disk(save_path)
     print(f"Dataset saved locally to: {save_path}")
 

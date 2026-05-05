@@ -12,8 +12,8 @@ from behaviors import (
 )
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_name", type=str, choices=["internvl2_5", "internvl3"], required=True)
-parser.add_argument("--model_size", type=str, choices=["2b", "8b", "26b", "38b"], required=True)
+parser.add_argument("--model_name", type=str, default="internvl3_5", choices=["internvl3_5"])
+parser.add_argument("--model_size", type=str, default="8b", choices=["8b"])
 parser.add_argument("--layers", nargs="+", type=int, required=True)
 
 args = parser.parse_args()

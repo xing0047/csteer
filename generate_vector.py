@@ -2,7 +2,7 @@
 Generates steering vectors for each layer of the model by averaging the activations of all the positive and negative examples.
 
 Example usage:
-python generate_vector.py --layers $(seq 0 31) --save_activations --model_name "internvl2_5" --model_size 8b --behaviors refer
+python generate_vector.py --layers $(seq 0 31) --model_name internvl3_5 --behaviors refer --behavior_paths ... --output_dir ...
 """
 
 import torch as t
@@ -23,10 +23,7 @@ from utils.mwrapper_map import (
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model_name", type=str, choices=["internvl3", "internvl3_5", "qwen3vl"]
-    )
-    parser.add_argument(
-        "--model_size", type=str, choices=["2b", "8b", "32b", "38b"]
+        "--model_name", type=str, choices=["internvl3_5", "qwen3vl"]
     )
     parser.add_argument(
         "--layers", nargs="+", type=int, default=list(range(28))
@@ -183,12 +180,12 @@ def generate_save_vectors(
 if __name__ == "__main__":
     
     args = parse_args()
-    wrapper = model_to_wrapper_map[args.model_name][args.model_size]
+    wrapper = model_to_wrapper_map[args.model_name]["8b"]
     generate_save_vectors(
         args.layers,
         wrapper,
         args.model_name,
-        args.model_size,
+        "8b",
         args.use_flash_attn,
         args.behaviors,
         args.behavior_paths,

@@ -463,7 +463,8 @@ def main():
         "--model-size",
         type=str,
         default="8b",
-        help="Model size (for qwen3vl, internvl)",
+        choices=["8b"],
+        help="Model size (for qwen3vl / internvl backends in Sa2VA)",
     )
     parser.add_argument(
         "--device",

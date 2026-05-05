@@ -140,7 +140,7 @@ class BlockOutputWrapper(t.nn.Module):
 class InternVL3_5_Wrapper:
     def __init__(
         self,
-        name: str = 'internvl3',
+        name: str = 'internvl3_5',
         size: str = "8b",
         use_flash_attn: bool = False,
         override_model_weights_path: Optional[str] = None,

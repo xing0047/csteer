@@ -25,7 +25,7 @@ from behaviors import (  # noqa: E402
     get_gar_caption_simple_data,
     get_gar_image_mc_data,
 )
-from utils.cd_qwen3vl_wrapper import (  # noqa: E402
+from utils.wrappers.qwen3vl_wrapper import (  # noqa: E402
     ADD_FROM_POS_CHAT,
     Qwen3VL_Wrapper,
 )
@@ -155,7 +155,6 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--task", choices=["mc", "simple", "detailed"], required=True)
     p.add_argument("--out", type=str, default="", help="Output JSON path")
-    p.add_argument("--model_size", type=str, default="8b")
     p.add_argument("--use_flash_attn", action="store_true")
     p.add_argument("--max_num", type=int, default=None)
     p.add_argument("--seed", type=int, default=42)
@@ -185,7 +184,7 @@ def main() -> None:
         top_p=args.top_p,
     )
 
-    model = Qwen3VL_Wrapper(name="qwen3vl", size=args.model_size, use_flash_attn=args.use_flash_attn)
+    model = Qwen3VL_Wrapper(name="qwen3vl", size="8b", use_flash_attn=args.use_flash_attn)
     model.set_save_internal_decodings(False)
 
     if args.task == "mc":
@@ -219,7 +218,7 @@ def main() -> None:
         "..",
         "RESULT",
         "gar_qwen3vl",
-        args.model_size,
+        "8b",
         f"results_gar_{suffix}.json",
     )
     out = os.path.abspath(out)

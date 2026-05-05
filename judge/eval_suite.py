@@ -9,13 +9,10 @@ Defaults match this repo layout:
 Examples (from repo root):
   python JUDGE/eval_suite.py vip --input ../RESULT/.../results_....json --output vip_metrics.json
   python JUDGE/eval_suite.py blink --input ../RESULT/.../results_....json
-  python JUDGE/eval_suite.py blink --mode blink_image_think_mc_qa --input .../results_....json
-  python JUDGE/eval_suite.py cvbench --mode cvbench_image_think_mc_qa --input .../results_....json
+  python JUDGE/eval_suite.py cvbench --input .../results_....json
   python JUDGE/eval_suite.py inst_it --mode image_mc --input ../RESULT/.../results_....json
-  python JUDGE/eval_suite.py inst_it --mode image_think_mc --input .../results_....json
   python JUDGE/eval_suite.py inst_it --mode image_oe --input ../RESULT/.../results_....json --output judged.json
   python JUDGE/eval_suite.py gar --kind mc --input ../RESULT/.../results_....json
-  python JUDGE/eval_suite.py gar --kind mc --think_mc --input .../results_....json
   python JUDGE/eval_suite.py gar --kind simple --input ... --output gar_simple_metrics.json
 
 InternVL-78B / VLMEvalKit (.xlsx): convert first —
@@ -32,7 +29,6 @@ import re
 import sys
 import time
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -368,46 +364,6 @@ def _blink_cvbench_rows_for_metrics(rows: List[Dict[str, Any]]) -> List[Dict[str
     return out
 
 
-def _blink_cvbench_rows_think_llm(
-    rows: List[Dict[str, Any]],
-    base_url: str,
-    model_name: str,
-    num_workers: int,
-) -> List[Dict[str, Any]]:
-    """blink_image_think_mc_qa / cvbench_image_think_mc_qa: extract A–D via system prompt + chat API."""
-    from mc_think_extract import ThinkMCAnswerExtractor
-
-    n = len(rows)
-    if n == 0:
-        return []
-    ex = ThinkMCAnswerExtractor(base_url=base_url, model_name=model_name)
-    letters = [""] * n
-
-    def _job(i: int) -> Tuple[int, str]:
-        text = (rows[i].get("model_output") or "").strip()
-        return i, ex.extract(text)
-
-    with ThreadPoolExecutor(max_workers=num_workers) as pool:
-        futs = [pool.submit(_job, i) for i in range(n)]
-        for fut in tqdm(
-            as_completed(futs),
-            total=n,
-            desc="Think MC extract (BLINK/CV-Bench)",
-            leave=False,
-        ):
-            i, letter = fut.result()
-            letters[i] = letter
-
-    out: List[Dict[str, Any]] = []
-    for i, item in enumerate(rows):
-        r = dict(item)
-        gt = (item.get("ground_truth") or item.get("answer") or "").strip().upper()
-        r["ground_truth"] = gt
-        r["extracted_prediction"] = letters[i]
-        out.append(r)
-    return out
-
-
 def eval_blink_subset(
     results_path: str,
     subsets: Optional[Sequence[str]],
@@ -434,17 +390,12 @@ def eval_blink_subset(
             f"Found type/sub_task values (normalized sample): {seen[:40]}{'...' if len(seen) > 40 else ''}. "
             "Ensure rows include BLINK sub_task in \"type\" (or \"sub_task\")."
         )
-    think = mode == "blink_image_think_mc_qa"
-    rows_for_m = (
-        _blink_cvbench_rows_think_llm(filtered, base_url, model_name, num_workers)
-        if think
-        else _blink_cvbench_rows_for_metrics(filtered)
-    )
+    rows_for_m = _blink_cvbench_rows_for_metrics(filtered)
     metrics = compute_metrics(rows_for_m)
     metrics["blink_subsets_used"] = sorted(allow)
     metrics["num_rows_filtered"] = len(filtered)
     metrics["eval_mode"] = mode
-    metrics["mc_extract"] = "think_llm" if think else "regex"
+    metrics["mc_extract"] = "regex"
     print(json.dumps(metrics["overall"], indent=2, ensure_ascii=False))
     if out_metrics:
         with open(out_metrics, "w", encoding="utf-8") as f:
@@ -465,15 +416,10 @@ def eval_cvbench(
     raw = _load_json_list_or_dict(results_path)
     if not isinstance(raw, list):
         raise ValueError("CV-Bench results must be a JSON list.")
-    think = mode == "cvbench_image_think_mc_qa"
-    rows_for_m = (
-        _blink_cvbench_rows_think_llm(raw, base_url, model_name, num_workers)
-        if think
-        else _blink_cvbench_rows_for_metrics(raw)
-    )
+    rows_for_m = _blink_cvbench_rows_for_metrics(raw)
     metrics = compute_metrics(rows_for_m)
     metrics["eval_mode"] = mode
-    metrics["mc_extract"] = "think_llm" if think else "regex"
+    metrics["mc_extract"] = "regex"
     if out_metrics:
         with open(out_metrics, "w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2, ensure_ascii=False)
@@ -505,8 +451,8 @@ def main() -> None:
     p_blink.add_argument(
         "--mode",
         default="blink_image_mc_qa",
-        choices=["blink_image_mc_qa", "blink_image_think_mc_qa"],
-        help="think: LLM extracts A–D (see utils/prompts mc_think_extract)",
+        choices=["blink_image_mc_qa"],
+        help="BLINK MC task id (for metrics metadata only)",
     )
     p_blink.add_argument(
         "--subsets",
@@ -524,8 +470,8 @@ def main() -> None:
     p_cv.add_argument(
         "--mode",
         default="cvbench_image_mc_qa",
-        choices=["cvbench_image_mc_qa", "cvbench_image_think_mc_qa"],
-        help="think: LLM extracts A–D",
+        choices=["cvbench_image_mc_qa"],
+        help="CV-Bench MC task id (for metrics metadata only)",
     )
     p_cv.add_argument("--base_url", default="http://127.0.0.1:23333/v1")
     p_cv.add_argument("--model_name", default="Qwen/Qwen2.5-72B-Instruct-AWQ")
@@ -537,9 +483,7 @@ def main() -> None:
         required=True,
         choices=[
             "image_mc",
-            "image_think_mc",
             "video_mc",
-            "video_think_mc",
             "image_oe",
             "video_oe",
         ],
@@ -557,11 +501,6 @@ def main() -> None:
 
     p_gar = sub.add_parser("gar", help="GAR: MC (no LLM) or simple/detail (lmdeploy True/False).")
     p_gar.add_argument("--kind", required=True, choices=["mc", "simple", "detailed"])
-    p_gar.add_argument(
-        "--think_mc",
-        action="store_true",
-        help="for kind=mc: LLM extract A–D (gar_image_think_mc_qa outputs)",
-    )
     p_gar.add_argument("--input", required=True)
     p_gar.add_argument("--output", default=None, help="metrics JSON path")
     p_gar.add_argument("--base_url", default="http://127.0.0.1:23333/v1")
@@ -602,8 +541,7 @@ def main() -> None:
         )
     elif args.cmd == "inst_it":
         if args.mode.endswith("_mc"):
-            think_extract = args.mode in ("image_think_mc", "video_think_mc")
-            if args.mode in ("image_mc", "image_think_mc"):
+            if args.mode == "image_mc":
                 gt_list = load_inst_it_image_mc_ground_truth()
                 split = "image"
             else:
@@ -615,11 +553,7 @@ def main() -> None:
                 out,
                 gt_list,
                 split=split,
-                think_extract=think_extract,
                 match_by_question_id=True,
-                base_url=args.base_url,
-                model_name=args.model_name,
-                num_workers=args.num_workers,
             )
             print(f"[inst_it {args.mode}] wrote {out}")
         else:
@@ -647,14 +581,7 @@ def main() -> None:
             preds = json.load(f)
         out = args.output or (args.input.replace(".json", f"_{args.kind}_metrics.json"))
         if args.kind == "mc":
-            compute_metric_mc_gar_vqa(
-                preds,
-                out,
-                think_extract=args.think_mc,
-                base_url=args.base_url,
-                model_name=args.model_name,
-                num_process=args.num_process,
-            )
+            compute_metric_mc_gar_vqa(preds, out)
         elif args.kind == "simple":
             compute_metric_gar_simple(
                 preds,

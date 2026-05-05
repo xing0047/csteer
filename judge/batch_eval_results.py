@@ -9,8 +9,6 @@ Batch-evaluate all steering / API / gar_qwen3vl / VLMEvalKit xlsx results under 
   (task type, multiplier, model_name, model_size, parent experiment folder) but
   differ only by layer get a group summary with the best layer and max metric.
 
-- API paths (gemini / o3): MC + BLINK + CV-Bench use LLM answer extraction (think).
-
 - InternVL3-78B xlsx under `internvl3-78b-api/`: if rows carry Inst-It task labels (type/dataset),
   one sheet can mix image/video and MC/OE; metrics are computed per subtask and written to
   `*.metrics.<task>.json` plus a combined `*.metrics.json` with `by_task`.
@@ -296,14 +294,25 @@ def write_smoke_json(src: Path, dst: Path, limit: int) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def is_api_think_path(path: str) -> bool:
-    p = path.replace("\\", "/").lower()
-    return "gemini" in p or "o3_api" in p or re.search(r"/o3/", p) is not None
-
-
 # ---------------------------------------------------------------------------
 # Filename → task type
 # ---------------------------------------------------------------------------
+
+_MC_EVAL_TASK_ALIASES = {
+    "gar_image_think_mc_qa": "gar_image_mc_qa",
+    "blink_image_think_mc_qa": "blink_image_mc_qa",
+    "cvbench_image_think_mc_qa": "cvbench_image_mc_qa",
+    "inst_it_image_think_mc_qa": "inst_it_image_mc_qa",
+    "inst_it_video_think_mc_qa": "inst_it_video_mc_qa",
+}
+
+
+def normalize_eval_task(task: Optional[str]) -> Optional[str]:
+    """Map legacy *think_mc* result types to standard MC eval tasks."""
+    if task is None:
+        return None
+    return _MC_EVAL_TASK_ALIASES.get(task, task)
+
 
 def parse_type_from_results_filename(name: str) -> Optional[str]:
     if not name.endswith(".json"):
@@ -381,20 +390,12 @@ def eval_one_json(
     *,
     base_url: str,
     judge_model: str,
-    api_think: bool,
     num_workers: int,
     skip_vip: bool,
 ) -> Tuple[Any, Optional[float]]:
     """Returns (raw_result_or_metrics, primary_float)."""
     os.makedirs(out_path.parent, exist_ok=True)
-    think_mc = api_think and task in (
-        "blink_image_mc_qa",
-        "cvbench_image_mc_qa",
-        "inst_it_image_mc_qa",
-        "inst_it_video_mc_qa",
-        "gar_image_mc_qa",
-        "gar_image_think_mc_qa",
-    )
+    task = normalize_eval_task(task) or task
 
     if task == "vip_image_oe_qa":
         if skip_vip:
@@ -412,12 +413,11 @@ def eval_one_json(
         return summ, pm
 
     if task == "blink_image_mc_qa":
-        mode = "blink_image_think_mc_qa" if think_mc else "blink_image_mc_qa"
         m = eval_blink_subset(
             str(json_path),
             None,
             str(out_path),
-            mode=mode,
+            mode="blink_image_mc_qa",
             base_url=base_url,
             model_name=judge_model,
             num_workers=num_workers,
@@ -425,11 +425,10 @@ def eval_one_json(
         return m, primary_metric_from_eval(task, m)
 
     if task == "cvbench_image_mc_qa":
-        mode = "cvbench_image_think_mc_qa" if think_mc else "cvbench_image_mc_qa"
         m = eval_cvbench(
             str(json_path),
             str(out_path),
-            mode=mode,
+            mode="cvbench_image_mc_qa",
             base_url=base_url,
             model_name=judge_model,
             num_workers=num_workers,
@@ -444,11 +443,7 @@ def eval_one_json(
             tmp_out,
             gt,
             split="image",
-            think_extract=think_mc,
             match_by_question_id=True,
-            base_url=base_url,
-            model_name=judge_model,
-            num_workers=num_workers,
         )
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump({"mc_eval": r, "tmp_json": tmp_out}, f, ensure_ascii=False, indent=2)
@@ -462,11 +457,7 @@ def eval_one_json(
             tmp_out,
             gt,
             split="video",
-            think_extract=think_mc,
             match_by_question_id=True,
-            base_url=base_url,
-            model_name=judge_model,
-            num_workers=num_workers,
         )
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump({"mc_eval": r, "tmp_json": tmp_out}, f, ensure_ascii=False, indent=2)
@@ -521,14 +512,7 @@ def eval_one_json(
     if task == "gar_image_mc_qa":
         with open(json_path, "r", encoding="utf-8") as f:
             preds = json.load(f)
-        res = compute_metric_mc_gar_vqa(
-            preds,
-            str(out_path),
-            think_extract=think_mc,
-            base_url=base_url,
-            model_name=judge_model,
-            num_process=num_workers,
-        )
+        res = compute_metric_mc_gar_vqa(preds, str(out_path))
         acc = res.get("accuracy")
         pm = float(acc) if isinstance(acc, (int, float)) else None
         return res, pm
@@ -570,10 +554,8 @@ def eval_one_json(
 
 INST_IT_XLSX_TASK_ORDER = (
     "inst_it_image_mc_qa",
-    "inst_it_image_think_mc_qa",
     "inst_it_image_oe_qa",
     "inst_it_video_mc_qa",
-    "inst_it_video_think_mc_qa",
     "inst_it_video_oe_qa",
 )
 
@@ -643,17 +625,16 @@ def infer_inst_it_task_from_row(
                 return task
         if "inst_it" in t or "inst-it" in t or "instit" in t:
             video = "video" in t
-            think = "think" in t
-            mc = "mc" in t or "multi" in t or "choice" in t
+            mc = "mc" in t or "multi" in t or "choice" in t or "think" in t
             oe = "oe" in t or "open" in t
             if video:
-                if mc or think:
-                    return "inst_it_video_think_mc_qa" if think else "inst_it_video_mc_qa"
+                if mc:
+                    return "inst_it_video_mc_qa"
                 if oe:
                     return "inst_it_video_oe_qa"
             else:
-                if mc or think:
-                    return "inst_it_image_think_mc_qa" if think else "inst_it_image_mc_qa"
+                if mc:
+                    return "inst_it_image_mc_qa"
                 if oe:
                     return "inst_it_image_oe_qa"
 
@@ -667,11 +648,8 @@ def infer_inst_it_task_from_row(
             return task
 
     if modality_hint in ("image", "video"):
-        think = "think" in nb or "think_mc" in nb
         ans = row.get("answer") or row.get("ground_truth") or row.get("label") or ""
         if _answer_looks_like_mc_option(ans):
-            if think:
-                return f"inst_it_{modality_hint}_think_mc_qa"
             return f"inst_it_{modality_hint}_mc_qa"
         if str(ans).strip():
             return f"inst_it_{modality_hint}_oe_qa"
@@ -695,9 +673,9 @@ def split_inst_rows_by_task(
 
 
 def _load_gt_for_inst_task(task: str) -> List[Dict[str, str]]:
-    if task in ("inst_it_image_mc_qa", "inst_it_image_think_mc_qa"):
+    if task == "inst_it_image_mc_qa":
         return load_inst_it_image_mc_ground_truth()
-    if task in ("inst_it_video_mc_qa", "inst_it_video_think_mc_qa"):
+    if task == "inst_it_video_mc_qa":
         return load_inst_it_video_mc_ground_truth()
     if task == "inst_it_image_oe_qa":
         return load_inst_it_image_oe_ground_truth()
@@ -728,7 +706,6 @@ def eval_internvl_inst_mixed_xlsx(
     base_url: str,
     judge_model: str,
     num_workers: int,
-    api_think: bool,
     rows: List[Dict[str, Any]],
 ) -> Tuple[Any, Optional[float]]:
     """One xlsx with multiple Inst-It rows: split by task, metrics per task + combined file."""
@@ -742,7 +719,7 @@ def eval_internvl_inst_mixed_xlsx(
     # To avoid mis-bucketing, force split based on filename + row count.
     stem_u = xlsx_path.stem.upper().replace("-", "_")
     if mh == "video" and ("INST_IT_VIDEO" in stem_u):
-        mc_key = "inst_it_video_think_mc_qa" if api_think else "inst_it_video_mc_qa"
+        mc_key = "inst_it_video_mc_qa"
         oe_key = "inst_it_video_oe_qa"
         n = 1001
         if len(rows) >= 2 * n:
@@ -751,7 +728,7 @@ def eval_internvl_inst_mixed_xlsx(
             buckets[oe_key] = rows[n : 2 * n]
             unknown = rows[2 * n :] if len(rows) > 2 * n else []
     elif mh == "image" and ("INST_IT_IMAGE" in stem_u):
-        mc_key = "inst_it_image_think_mc_qa" if api_think else "inst_it_image_mc_qa"
+        mc_key = "inst_it_image_mc_qa"
         oe_key = "inst_it_image_oe_qa"
         n = 1036
         if len(rows) >= 2 * n:
@@ -778,9 +755,8 @@ def eval_internvl_inst_mixed_xlsx(
 
         sub_metrics = out_metrics.parent / f"{out_metrics.stem}.{task}.json"
 
-        if "mc" in task or "think_mc" in task:
+        if task.endswith("_mc_qa"):
             split = "image" if "image" in task else "video"
-            think = ("think" in task) and api_think
 
             # InternVL VLMEvalKit xlsx already carries GT in the "answer" column for MC.
             # Use in-sheet GT to avoid any mismatch/offset with external datasets.
@@ -821,13 +797,9 @@ def eval_internvl_inst_mixed_xlsx(
                     str(mc_out),
                     gt,
                     split=split,
-                    think_extract=think,
                     match_by_question_id=True,
-                    base_url=base_url,
-                    model_name=judge_model,
-                    num_workers=num_workers,
                 )
-                payload = {"task": task, "split": split, "think_extract": think, "mc_eval": r, "mc_eval_file": str(mc_out)}
+                payload = {"task": task, "split": split, "think_extract": False, "mc_eval": r, "mc_eval_file": str(mc_out)}
             with open(sub_metrics, "w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
             by_task[task] = r
@@ -882,7 +854,6 @@ def xlsx_to_eval(
     judge_model: str,
     num_workers: int,
     row_limit: Optional[int] = None,
-    api_think: bool = False,
 ) -> Tuple[Any, Optional[float]]:
     from xlsx_to_steering_json import xlsx_to_rows
 
@@ -929,7 +900,6 @@ def xlsx_to_eval(
             base_url,
             judge_model,
             num_workers,
-            api_think,
             rows,
         )
 
@@ -941,11 +911,7 @@ def xlsx_to_eval(
             mc_out,
             gt,
             split="video",
-            think_extract=False,
             match_by_question_id=True,
-            base_url=base_url,
-            model_name=judge_model,
-            num_workers=num_workers,
         )
         with open(out_metrics, "w", encoding="utf-8") as f:
             json.dump({"mc_eval": r}, f, indent=2, ensure_ascii=False)
@@ -958,11 +924,7 @@ def xlsx_to_eval(
             mc_out,
             gt,
             split="image",
-            think_extract=False,
             match_by_question_id=True,
-            base_url=base_url,
-            model_name=judge_model,
-            num_workers=num_workers,
         )
         with open(out_metrics, "w", encoding="utf-8") as f:
             json.dump({"mc_eval": r}, f, indent=2, ensure_ascii=False)
@@ -1112,7 +1074,6 @@ def main() -> None:
                         args.judge_model,
                         workers,
                         row_limit=row_lim,
-                        api_think=is_api_think_path(str(p)),
                     )
                     records_local.append(
                         {
@@ -1164,14 +1125,12 @@ def main() -> None:
                     )
                     continue
                 os.makedirs(out_p.parent, exist_ok=True)
-                api_think = is_api_think_path(str(p))
                 payload, pm = eval_one_json(
                     json_in,
                     out_p,
                     task,
                     base_url=args.base_url,
                     judge_model=args.judge_model,
-                    api_think=api_think,
                     num_workers=workers,
                     skip_vip=skip_vip_effective,
                 )
@@ -1179,7 +1138,6 @@ def main() -> None:
                     "path": rel,
                     "task": task,
                     "primary_metric": pm,
-                    "api_think": api_think,
                     "out": str(out_p),
                     "smoke": bool(args.smoke),
                 }

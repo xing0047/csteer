@@ -337,15 +337,6 @@ class Qwen3VL_Wrapper:
             options = "\n".join([f"{chr(65+i)}. {choice}" for i, choice in enumerate(dataloader_item['choices'])])
             prompt = f"{pre}\n{dataloader_item['question']}\n{options}\n{post}"
             return images, prompt
-        elif type == 'blink_image_think_mc_qa':
-            assert 'pil_images' in dataloader_item
-            images = dataloader_item['pil_images']
-
-            pre = prompt_template["blink_image_think_mc"]["pre_prompt"]
-            post = prompt_template["blink_image_think_mc"]["post_prompt"]
-            options = "\n".join([f"{chr(65+i)}. {choice}" for i, choice in enumerate(dataloader_item['choices'])])
-            prompt = f"{pre}\n{dataloader_item['question']}\n{options}\n{post}"
-            return images, prompt
         elif type == 'cvbench_image_mc_qa':
             assert 'pil_image' in dataloader_item
             image = dataloader_item['pil_image']
@@ -354,34 +345,12 @@ class Qwen3VL_Wrapper:
             post = prompt_template["image_mc"]["post_prompt"]
             prompt = f"{pre}\n{dataloader_item['question']}\n{post}"
             return image, prompt
-        elif type == 'cvbench_image_think_mc_qa':
-            assert 'pil_image' in dataloader_item
-            image = dataloader_item['pil_image']
-
-            pre = prompt_template["cvbench_image_think_mc"]["pre_prompt"]
-            post = prompt_template["cvbench_image_think_mc"]["post_prompt"]
-            prompt = f"{pre}\n{dataloader_item['question']}\n{post}"
-            return image, prompt
         elif type == 'inst_it_image_mc_qa':
             assert 'pil_image' in dataloader_item
             image = dataloader_item['pil_image'].convert('RGB')
 
             pre  = prompt_template["image_mc"]["pre_prompt"]
             post = prompt_template["image_mc"]["post_prompt"]
-            options = (
-                f"A. {dataloader_item['choice_a']}\n"
-                f"B. {dataloader_item['choice_b']}\n"
-                f"C. {dataloader_item['choice_c']}\n"
-                f"D. {dataloader_item['choice_d']}"
-            )
-            prompt = f"{pre}\n{dataloader_item['question']}\n{options}\n{post}"
-            return image, prompt
-        elif type == 'inst_it_image_think_mc_qa':
-            assert 'pil_image' in dataloader_item
-            image = dataloader_item['pil_image'].convert('RGB')
-
-            pre  = prompt_template["image_think_mc"]["pre_prompt"]
-            post = prompt_template["image_think_mc"]["post_prompt"]
             options = (
                 f"A. {dataloader_item['choice_a']}\n"
                 f"B. {dataloader_item['choice_b']}\n"
@@ -437,20 +406,6 @@ class Qwen3VL_Wrapper:
             # post-process: from <Prompt*> to [*]
             prompt = re.sub(r'<Prompt(\d+)>', r'[\1]', prompt)
             # post-process: overlay visual prompts
-            if not getattr(self, "noref", False):
-                image = overlay_visual_prompt(image, dataloader_item["mask_rles"], format="boxnum")
-            return image, prompt
-        elif type == 'gar_image_think_mc_qa':
-            assert 'pil_image' in dataloader_item
-            image = dataloader_item['pil_image'].convert('RGB')
-
-            pre  = prompt_template["image_think_mc"]["pre_prompt"]
-            post = prompt_template["image_think_mc"]["post_prompt"]
-            options = "\n".join(dataloader_item['choices'])
-            prompt = f"{pre}\n{dataloader_item['question']}\n{options}\n{post}"
-            # post-process for gar question from <Prompt*> to [*]
-            prompt = re.sub(r'<Prompt(\d+)>', r'[\1]', prompt)
-            # post-process for gar image for overlay visual prompts
             if not getattr(self, "noref", False):
                 image = overlay_visual_prompt(image, dataloader_item["mask_rles"], format="boxnum")
             return image, prompt

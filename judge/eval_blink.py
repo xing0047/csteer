@@ -18,11 +18,10 @@ from typing import Optional, Dict, List, Any
 
 import torch
 
-# 导入数据加载函数
 from behaviors import get_blink_image_mc_data, get_cvbench_image_mc_data
 
 
-# ============ 模型加载工厂 ============
+# ============ Model factory ============
 
 def load_model(model_type: str, **kwargs):
     """
@@ -91,7 +90,7 @@ def load_model(model_type: str, **kwargs):
         raise ValueError(f"Unsupported model type: {model_type}")
 
 
-# ============ 评估函数 ============
+# ============ Evaluation ============
 
 def extract_answer(response: str) -> str:
     """
@@ -105,7 +104,6 @@ def extract_answer(response: str) -> str:
     """
     response = response.strip().upper()
     
-    # 常见的答案前缀
     answer_prefixes = [
         "THE BEST ANSWER IS",
         "THE CORRECT ANSWER IS",
@@ -119,7 +117,6 @@ def extract_answer(response: str) -> str:
     for prefix in answer_prefixes:
         response = response.replace(prefix, "")
     
-    # 查找 A/B/C/D
     match = re.search(r"[ABCD]", response)
     return match.group(0) if match else ""
 
@@ -155,27 +152,22 @@ def evaluate_blink(
     print(f"Task: {task_type}")
     print(f"{'='*60}\n")
     
-    # 加载数据
     print("Loading BLINK data...")
     data = get_blink_image_mc_data()
     
-    # 按子集过滤
     if subsets:
         data = [item for item in data if item["type"] in subsets]
         print(f"Filtered to subsets: {subsets}")
     
-    # 限制样本数
     if max_samples:
         data = data[:max_samples]
     
     print(f"Total samples: {len(data)}")
     
-    # 推理循环
     results = []
     
     for item in tqdm(data, desc="Evaluating"):
         try:
-            # 使用统一的 generate 接口（支持 vipllava 和 sa2va 系列）
             if model_type in ["vipllava", "sa2va", "sa2va_qwen3vl", "sa2va_qwen25vl", "sa2va_internvl"]:
                 response = model.generate(
                     dataloader_item=item,
@@ -185,11 +177,9 @@ def evaluate_blink(
                     verbose=verbose,
                 )
             else:
-                # 对于其他模型，使用 get_inputs 方法
                 images, prompt = model.get_inputs(task_type, item)
                 if isinstance(images, list):
-                    # 多图情况 - 需要特殊处理
-                    # 这里简化处理，只使用第一张图
+                    # Multi-image items: use first frame only in this script
                     image = images[0] if images else None
                 else:
                     image = images
@@ -201,7 +191,6 @@ def evaluate_blink(
                     max_new_tokens=max_new_tokens,
                 )
             
-            # 提取预测答案
             prediction = extract_answer(response)
             
             result = {
@@ -232,16 +221,13 @@ def evaluate_blink(
                 "extracted_prediction": "",
             })
     
-    # 保存原始结果
     os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else ".", exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nResults saved to: {output_file}")
     
-    # 计算并显示指标
     metrics = compute_metrics(results)
     
-    # 保存指标
     metrics_file = output_file.replace(".json", "_metrics.json")
     with open(metrics_file, "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2, ensure_ascii=False)
@@ -271,7 +257,6 @@ def evaluate_cvbench(
     print(f"Task: {task_type}")
     print(f"{'='*60}\n")
     
-    # 加载数据
     print("Loading CV-Bench data...")
     data = get_cvbench_image_mc_data()
     
@@ -284,7 +269,6 @@ def evaluate_cvbench(
     
     for item in tqdm(data, desc="Evaluating"):
         try:
-            # 使用统一的 generate 接口（支持 vipllava 和 sa2va 系列）
             if model_type in ["vipllava", "sa2va", "sa2va_qwen3vl", "sa2va_qwen25vl", "sa2va_internvl"]:
                 response = model.generate(
                     dataloader_item=item,
@@ -326,7 +310,6 @@ def evaluate_cvbench(
                 "extracted_prediction": "",
             })
     
-    # 保存结果
     os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else ".", exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
@@ -356,7 +339,6 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     correct = 0
     valid = 0
     
-    # 按类型统计
     type_stats = {}
     
     for item in results:
@@ -368,7 +350,6 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         gt = item.get("ground_truth", "").strip().upper()
         task_type = item.get("type", "unknown")
         
-        # 初始化类型统计
         if task_type not in type_stats:
             type_stats[task_type] = {"total": 0, "valid": 0, "correct": 0}
         
@@ -383,7 +364,6 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
                 correct += 1
                 type_stats[task_type]["correct"] += 1
     
-    # 计算准确率
     overall_acc = (correct / valid * 100) if valid > 0 else 0.0
     
     per_type_acc = {}
@@ -410,14 +390,12 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     
-    # 打印结果
     print(f"\n{'='*60}")
     print(f"EVALUATION RESULTS")
     print(f"{'='*60}")
     print(f"Overall Accuracy: {correct}/{valid} = {overall_acc:.2f}%")
     print(f"\nPer-Task Accuracy:")
     
-    # BLINK 子任务缩写映射
     BLINK_ABBREV = {
         "Visual_Correspondence": "VCO",
         "Relative_Reflectance": "RRF",
@@ -440,12 +418,11 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     return metrics
 
 
-# ============ 主函数 ============
+# ============ CLI ============
 
 def main():
     parser = argparse.ArgumentParser(description="BLINK Benchmark Evaluation")
     
-    # 模型参数
     parser.add_argument(
         "--model",
         type=str,
@@ -488,7 +465,6 @@ def main():
         help="Disable flash attention (for Sa2VA models)",
     )
     
-    # 评估参数
     parser.add_argument(
         "--benchmark",
         type=str,
@@ -532,27 +508,13 @@ def main():
         action="store_true",
         help="Print verbose output",
     )
-    parser.add_argument(
-        "--think-mode",
-        action="store_true",
-        help="Use thinking mode prompt template",
-    )
-    
     args = parser.parse_args()
-    
-    # 确定任务类型
+
     if args.benchmark == "blink":
-        if args.think_mode:
-            task_type = "blink_image_think_mc_qa"
-        else:
-            task_type = "blink_image_mc_qa"
-    else:  # cvbench
-        if args.think_mode:
-            task_type = "cvbench_image_think_mc_qa"
-        else:
-            task_type = "cvbench_image_mc_qa"
+        task_type = "blink_image_mc_qa"
+    else:
+        task_type = "cvbench_image_mc_qa"
     
-    # 加载模型
     print(f"Loading model: {args.model}")
     model = load_model(
         model_type=args.model,
@@ -564,7 +526,6 @@ def main():
         use_flash_attn=not args.no_flash_attn,
     )
     
-    # 运行评估
     if args.benchmark == "blink":
         results, metrics = evaluate_blink(
             model=model,

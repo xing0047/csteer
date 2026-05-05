@@ -21,49 +21,41 @@ def overlay_visual_prompt(image, mask_rles, format="box", box_width=2):
             x1, y1, x2, y2 = box
             color = COLOR[box_id % len(COLOR)]
             
-            # 绘制矩形
             draw.rectangle([x1, y1, x2, y2], outline=color, width=box_width)
             
-            # 绘制编号文字
-            text = str(box_id)  # 或者 str(box_id) 如果你想从0开始
+            text = str(box_id)
             
-            # 尝试使用更大的字体，如果失败则使用默认字体
             try:
-                font = ImageFont.truetype("arial.ttf", size=80)  # 可以调整size
+                font = ImageFont.truetype("arial.ttf", size=80)
             except:
                 font = ImageFont.load_default()
             
-            # 获取文字边界框
             bbox = draw.textbbox((x1, y1), text, font=font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
 
-            # 默认画在框的上方左侧
+            # Default: label above box, left-aligned
             bg_x1 = x1
             bg_y1 = y1 - text_height - 8
 
-            # 如果上方空间不足，则把数字框放到框内（靠近左上）
             if bg_y1 < 0:
-                bg_y1 = y1  # 改为从框的顶部开始向下画
+                bg_y1 = y1  # Place inside box from top if no room above
 
             bg_x2 = bg_x1 + text_width + 8
             bg_y2 = bg_y1 + text_height + 8
 
-            # 右侧越界时向左收缩，保证在图像内
             if bg_x2 > img_w:
                 shift = bg_x2 - img_w
                 bg_x1 = max(0, bg_x1 - shift)
                 bg_x2 = bg_x1 + text_width + 8
 
-            # 再次确保不越界（防御性判断）
             bg_y1 = max(0, min(bg_y1, img_h - text_height - 8))
             bg_y2 = bg_y1 + text_height + 8
             
-            # 绘制文字背景（让文字更清晰）
             background_box = [bg_x1, bg_y1, bg_x2, bg_y2]
             draw.rectangle(background_box, fill=color)
             
-            # 绘制文字（白色），稍微留一点内边距
+            # White text with small padding
             text_x = bg_x1 + 4
             text_y = bg_y1 + 4
             draw.text((text_x, text_y), text, fill=(255, 255, 255), font=font)

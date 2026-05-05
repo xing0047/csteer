@@ -8,29 +8,14 @@ prompt_template = {
         "post_prompt": "The best answer is: "
     },
 
-    "image_think_mc": {
-        "pre_prompt": "Based on the image, reason and answer the multiple-choice question. In both the question and options, specific objects are represented using the format [ID] (e.g., '[REF]'', '[A]''. Respond with only the letter (A, B, C, or D) of the correct option. provide your reasoning between the <think> and </think> tags, and then give your final answer between the <answer> and </answer> tags.",
-        "post_prompt": "Your answer: "
-    },
-
     "blink_image_mc": {
         "pre_prompt": "Based on the image, select the best answer to the following multiple-choice question. In both the question and options, specific objects are represented using the format [ID] (e.g., '[REF]'', '[A]''. Respond with only the letter (A, B, C, or D) of the correct option.",
         "post_prompt": "The best answer is: "
     },
 
-    "blink_image_think_mc": {
-        "pre_prompt": "Based on the image, reason and answer the multiple-choice question. In both the question and options, specific objects are represented using the format [ID] (e.g., '[REF]'', '[A]''. Respond with only the letter (A, B, C, or D) of the correct option. provide your reasoning between the <think> and </think> tags, and then give your final answer between the <answer> and </answer> tags.",
-        "post_prompt": "Your answer: "
-    },
-
     "cvbench_image_mc": {
         "pre_prompt": "Based on the image, select the best answer to the following multiple-choice question. In both the question and options, specific objects are represented using the format [ID] (e.g., '[REF]'', '[A]''. Respond with only the letter (A, B, C, or D) of the correct option.",
         "post_prompt": "The best answer is: "
-    },
-
-    "cvbench_image_think_mc": {
-        "pre_prompt": "Based on the image, reason and answer the multiple-choice question. In both the question and options, specific objects are represented using the format [ID] (e.g., '[REF]'', '[A]''. Respond with only the letter (A, B, C, or D) of the correct option. provide your reasoning between the <think> and </think> tags, and then give your final answer between the <answer> and </answer> tags.",
-        "post_prompt": "Your answer: "
     },
 
     "image_oe": {
@@ -142,18 +127,5 @@ The input is a set of test items to be scored, where each item includes:
 - `response from the tester`.
 Now, let's begin the evaluation, here are the input test items:
 """
-    },
-    "mc_think_extract": {
-        "system": """You extract the multiple-choice letter from a vision-language model's full output.
-The output may contain chain-of-thought, optional reasoning wrapped in special tags, and a final answer.
-Rules:
-- Prefer the letter inside <answer>...</answer> if present (case-insensitive).
-- Otherwise infer the model's chosen option (A, B, C, or D) from the conclusion only; ignore distractor letters in reasoning.
-- Respond with exactly one uppercase letter: A, B, C, or D. If truly impossible, respond with X.""",
-        "user_template": """Full model output:
----
-{model_output}
----
-Reply with exactly one character: A, B, C, D, or X.""",
     },
 }

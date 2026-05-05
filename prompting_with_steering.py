@@ -181,12 +181,8 @@ def process_item_blink_image_mc_qa(
     in_query: bool = False,
     marker_only: bool = False,
     not_marker: bool = False,
-    think: bool = False,
 ) -> Dict[str, Any]:
-    if think:
-        images, question = model.get_inputs("blink_image_think_mc_qa", item)
-    else:
-        images, question = model.get_inputs("blink_image_mc_qa", item)
+    images, question = model.get_inputs("blink_image_mc_qa", item)
     generation_config = dict(max_new_tokens=1024, do_sample=False)
     if len(images) == 1:
         model_output = model.generate_text(
@@ -219,12 +215,8 @@ def process_item_cvbench_image_mc_qa(
     in_query: bool = False,
     marker_only: bool = False,
     not_marker: bool = False,
-    think: bool = False,
 ) -> Dict[str, Any]:
-    if think:
-        image, question = model.get_inputs("cvbench_image_think_mc_qa", item)
-    else:
-        image, question = model.get_inputs("cvbench_image_mc_qa", item)
+    image, question = model.get_inputs("cvbench_image_mc_qa", item)
     generation_config = dict(max_new_tokens=1024, do_sample=False)
     model_output = model.generate_text(
         image, vision_type="image", question=question, in_query=in_query, 
@@ -250,12 +242,8 @@ def process_item_inst_it_image_mc_qa(
     in_query: bool = False,
     marker_only: bool = False,
     not_marker: bool = False,
-    think: bool = False,
 ) -> Dict[str, str]:
-    if think:
-        image, question = model.get_inputs('inst_it_image_think_mc_qa', item)
-    else:
-        image, question = model.get_inputs('inst_it_image_mc_qa', item)
+    image, question = model.get_inputs('inst_it_image_mc_qa', item)
     generation_config = dict(max_new_tokens=1024, do_sample=False)
     model_output = model.generate_text(
         image, vision_type="image", question=question, in_query=in_query, 
@@ -346,12 +334,8 @@ def process_item_gar_image_mc_qa(
     in_query: bool = False,
     marker_only: bool = False,
     not_marker: bool = False,
-    think: bool = False,
 ) -> Dict[str, Any]:
-    if think:
-        image, question = model.get_inputs("gar_image_think_mc_qa", item)
-    else:
-        image, question = model.get_inputs("gar_image_mc_qa", item)
+    image, question = model.get_inputs("gar_image_mc_qa", item)
     generation_config = dict(max_new_tokens=1024, do_sample=False)
     model_output = model.generate_text(
         image, vision_type="image", question=question, in_query=in_query, 
@@ -459,16 +443,12 @@ def test_steering(
         "vip_image_oe_qa": process_item_vip_image_oe_qa,
         # "dlc_bench_qa": process_item_dlc_bench_qa,
         "blink_image_mc_qa": process_item_blink_image_mc_qa,
-        "blink_image_think_mc_qa": process_item_blink_image_mc_qa,
         "cvbench_image_mc_qa": process_item_cvbench_image_mc_qa,
-        "cvbench_image_think_mc_qa": process_item_cvbench_image_mc_qa,
         "inst_it_image_mc_qa": process_item_inst_it_image_mc_qa,
-        "inst_it_image_think_mc_qa": process_item_inst_it_image_mc_qa,
         "inst_it_image_oe_qa": process_item_inst_it_image_oe_qa,
         "inst_it_video_mc_qa": process_item_inst_it_video_mc_qa,
         "inst_it_video_oe_qa": process_item_inst_it_video_oe_qa,
         "gar_image_mc_qa": process_item_gar_image_mc_qa,
-        "gar_image_think_mc_qa": process_item_gar_image_mc_qa,
         "gar_image_simple_oe_qa": process_item_gar_image_simple_oe_qa,
         "gar_image_detail_oe_qa": process_item_gar_image_detail_oe_qa,
     }
@@ -477,16 +457,12 @@ def test_steering(
         "vip_image_oe_qa": (lambda: get_vip_bench_data(noref=True)) if noref else get_vip_bench_data,
         "dlc_bench_qa": get_dlc_bench_data,
         "blink_image_mc_qa": (lambda: get_blink_image_mc_data(noref=True)) if noref else get_blink_image_mc_data,
-        "blink_image_think_mc_qa": (lambda: get_blink_image_mc_data(noref=True)) if noref else get_blink_image_mc_data,
         "cvbench_image_mc_qa": (lambda: get_cvbench_image_mc_data(noref=True)) if noref else get_cvbench_image_mc_data,
-        "cvbench_image_think_mc_qa": (lambda: get_cvbench_image_mc_data(noref=True)) if noref else get_cvbench_image_mc_data,
         "inst_it_image_mc_qa": (lambda: get_inst_it_image_mc_data(noref=True)) if noref else get_inst_it_image_mc_data,
-        "inst_it_image_think_mc_qa": (lambda: get_inst_it_image_mc_data(noref=True)) if noref else get_inst_it_image_mc_data,
         "inst_it_image_oe_qa": (lambda: get_inst_it_image_oe_data(noref=True)) if noref else get_inst_it_image_oe_data,
         "inst_it_video_mc_qa": (lambda: get_inst_it_video_mc_data(noref=True)) if noref else get_inst_it_video_mc_data,
         "inst_it_video_oe_qa": (lambda: get_inst_it_video_oe_data(noref=True)) if noref else get_inst_it_video_oe_data,
         "gar_image_mc_qa": (lambda: get_gar_image_mc_data(noref=True)) if noref else get_gar_image_mc_data,
-        "gar_image_think_mc_qa": (lambda: get_gar_image_mc_data(noref=True)) if noref else get_gar_image_mc_data,
         "gar_image_simple_oe_qa": (lambda: get_gar_caption_simple_data(noref=True)) if noref else get_gar_caption_simple_data,
         "gar_image_detail_oe_qa": (lambda: get_gar_caption_detailed_data(noref=True)) if noref else get_gar_caption_detailed_data,
     }
@@ -588,16 +564,6 @@ def test_steering(
                                     f"[skip_by_video_path->gt] type={settings.type} "
                                     f"qid={item.get('question_id', 'NA')} path={video_path}"
                                 )
-                            elif "think" in settings.type:
-                                result = process_methods[settings.type](
-                                    item=item,
-                                    model=model,
-                                    system_prompt=None,
-                                    verbose=verbose,
-                                    in_query=in_query,
-                                    marker_only=marker_only, not_marker=not_marker,
-                                    think=True
-                                )
                             else:
                                 result = process_methods[settings.type](
                                     item=item,
@@ -681,17 +647,13 @@ if __name__ == "__main__":
         required=True,
         choices=[
             "vip_image_oe_qa",
-            "blink_image_mc_qa", 
-            "blink_image_think_mc_qa", 
-            "cvbench_image_mc_qa", 
-            "cvbench_image_think_mc_qa", 
-            "inst_it_image_mc_qa", 
-            "inst_it_image_think_mc_qa", 
+            "blink_image_mc_qa",
+            "cvbench_image_mc_qa",
+            "inst_it_image_mc_qa",
             "inst_it_image_oe_qa",
-            "inst_it_video_mc_qa", 
+            "inst_it_video_mc_qa",
             "inst_it_video_oe_qa",
             "gar_image_mc_qa",
-            "gar_image_think_mc_qa",
             "gar_image_simple_oe_qa",
             "gar_image_detail_oe_qa",
         ],

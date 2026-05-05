@@ -151,7 +151,7 @@ def load_image(type, item, input_size=448, max_num=12, box=None, box_color='red'
             image_file = os.path.join("../data/Inst-IT-Dataset", item.get('image_path', ''))
             image = Image.open(image_file).convert('RGB')
 
-        # 2) 官方 prompt 组装
+        # 2) Official prompt assembly
         pre  = prompt_template["image_mc"]["pre_prompt"]
         post = prompt_template["image_mc"]["post_prompt"]
         options = (
@@ -172,7 +172,7 @@ def load_image(type, item, input_size=448, max_num=12, box=None, box_color='red'
 
         pre  = prompt_template["image_oe"]["pre_prompt"]
         post = prompt_template["image_oe"]["post_prompt"]
-        # 注意：官方顺序是 pre → post → question
+        # Official order: pre, post, then question
         prompt = f"{pre}\n{post}\n{item['question']}"
     else:
         raise ValueError(f'{type} not supported.')

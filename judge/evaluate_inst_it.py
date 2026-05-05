@@ -1,6 +1,5 @@
 """
-Inst-It-Bench 统一评测模块
-整合了 Image MC/OE 和 Video MC/OE 的评测功能
+Unified Inst-It-Bench evaluation (image/video, multiple-choice and open-ended).
 """
 import argparse
 import json
@@ -18,14 +17,14 @@ from openai import OpenAI
 from utils.prompts import prompt_template
 
 
-# ============ 常量定义 ============
+# ============ Constants ============
 
 PROMPTS = {
     "image": prompt_template["gpt_eval"]["image"],
     "video": prompt_template["gpt_eval"]["video"]
 }
 
-# 元数据解析模式
+# Filename metadata regex patterns
 META_PATTERNS = {
     "layer": re.compile(r"layer[_=]([0-9]+)"),
     "multiplier": re.compile(r"multiplier[_=]([-+0-9.]+)"),
@@ -36,10 +35,10 @@ META_PATTERNS = {
 }
 
 
-# ============ 工具函数 ============
+# ============ Utilities ============
 
 def parse_meta_from_filename(fname: str) -> dict:
-    """从文件名中解析元数据"""
+    """Parse metadata fields from a results filename."""
     fname_no_ext = fname.replace('.json', '').replace('_evaluated', '')
     meta = {}
     for k, pat in META_PATTERNS.items():
@@ -50,27 +49,27 @@ def parse_meta_from_filename(fname: str) -> dict:
 
 
 def extract_answer(text: str) -> str:
-    """从模型输出中提取答案选项 (A/B/C/D)"""
+    """Extract MC letter (A/B/C/D) from model output."""
     if not text:
         return ""
     
     text = text.strip()
     
-    # 直接匹配单个字母
+    # Single-letter reply
     if text.upper() in ["A", "B", "C", "D"]:
         return text.upper()
     
-    # 匹配开头的字母
+    # Leading letter with punctuation
     match = re.match(r'^([A-Da-d])[.\s\)]', text)
     if match:
         return match.group(1).upper()
     
-    # 匹配 "The answer is X" 格式
+    # Phrases like "The answer is X"
     match = re.search(r'(?:answer|option|choice)\s*(?:is|:)?\s*([A-Da-d])', text, re.IGNORECASE)
     if match:
         return match.group(1).upper()
     
-    # 匹配文本中的第一个单独的 A/B/C/D
+    # First standalone A–D in the text
     match = re.search(r'\b([A-Da-d])\b', text)
     if match:
         return match.group(1).upper()
@@ -79,7 +78,7 @@ def extract_answer(text: str) -> str:
 
 
 def extract_characters_regex(s: str) -> str:
-    """处理多选题响应中的前缀，提取答案字符（A/B/C/D）"""
+    """Strip common prefixes and extract A/B/C/D from an MC-style reply."""
     s = s.strip()
     answer_prefixes = [
         "The best answer is", "The correct answer is", "The answer is",
@@ -97,8 +96,8 @@ def extract_characters_regex(s: str) -> str:
 
 
 def extract_actual_question(full_question: str) -> str:
-    """从完整的 prompt 中提取实际的问题部分"""
-    # 尝试提取 "please answer the question:" 后面的内容
+    """Extract the user-visible question from a full prompt string."""
+    # Prefer text after "please answer the question:"
     patterns = [
         r"please answer the question:\s*\n?(.*?)$",
         r"please answer the question:\s*(.*?)$",
@@ -120,10 +119,10 @@ def index_gt_by_question_id(gt_list: List[Dict[str, str]]) -> Dict[str, Dict[str
     return out
 
 
-# ============ 数据集加载 ============
+# ============ Dataset loading ============
 
 def load_inst_it_image_mc_ground_truth() -> List[Dict[str, str]]:
-    """加载 Inst-It-Bench image_multi_choice 数据集"""
+    """Load Inst-It-Bench image_multi_choice split for ground truth."""
     print("Loading Inst-It-Bench image_multi_choice dataset for ground truth...")
     try:
         import pandas as pd
@@ -143,7 +142,7 @@ def load_inst_it_image_mc_ground_truth() -> List[Dict[str, str]]:
             gt_list.append({
                 "question_id": str(row.get("question_id", f"{idx:03d}-{idx:02d}")),
                 "question": row.get("question", "").strip(),
-                "answer": row.get("answer", ""),  # 正确答案选项 (A/B/C/D)
+                "answer": row.get("answer", ""),  # GT option letter (A/B/C/D)
             })
         
         print(f"  Loaded {len(gt_list)} ground truth entries from Inst-It-Bench image_multi_choice")
@@ -156,7 +155,7 @@ def load_inst_it_image_mc_ground_truth() -> List[Dict[str, str]]:
 
 
 def load_inst_it_video_mc_ground_truth() -> List[Dict[str, str]]:
-    """加载 Inst-It-Bench video_multi_choice 数据集"""
+    """Load Inst-It-Bench video_multi_choice split for ground truth."""
     print("Loading Inst-It-Bench video_multi_choice dataset for ground truth...")
     try:
         import pandas as pd
@@ -176,7 +175,7 @@ def load_inst_it_video_mc_ground_truth() -> List[Dict[str, str]]:
             gt_list.append({
                 "question_id": str(row.get("question_id", f"{idx:03d}-{idx:02d}")),
                 "question": row.get("question", "").strip(),
-                "answer": row.get("answer", ""),  # 正确答案选项 (A/B/C/D)
+                "answer": row.get("answer", ""),  # GT option letter (A/B/C/D)
             })
         
         print(f"  Loaded {len(gt_list)} ground truth entries from Inst-It-Bench video_multi_choice")
@@ -189,7 +188,7 @@ def load_inst_it_video_mc_ground_truth() -> List[Dict[str, str]]:
 
 
 def load_inst_it_image_oe_ground_truth() -> List[Dict[str, str]]:
-    """加载 Inst-It-Bench image_open_ended 数据集"""
+    """Load Inst-It-Bench image_open_ended split for ground truth."""
     print("Loading Inst-It-Bench image_open_ended dataset for ground truth...")
     try:
         import pandas as pd
@@ -220,7 +219,7 @@ def load_inst_it_image_oe_ground_truth() -> List[Dict[str, str]]:
 
 
 def load_inst_it_video_oe_ground_truth() -> List[Dict[str, str]]:
-    """加载 Inst-It-Bench video_open_ended 数据集"""
+    """Load Inst-It-Bench video_open_ended split for ground truth."""
     print("Loading Inst-It-Bench video_open_ended dataset for ground truth...")
     try:
         import pandas as pd
@@ -253,7 +252,7 @@ def load_inst_it_video_oe_ground_truth() -> List[Dict[str, str]]:
 # ============ vLLM Judge ============
 
 class VLLMJudge:
-    """使用 vLLM 进行评分的 Judge 类"""
+    """LLM judge backed by an OpenAI-compatible vLLM HTTP API."""
     
     def __init__(self, base_url: str = "http://localhost:8000/v1", model_name: str = None, timeout: int = 300):
         print(f"Connecting to vLLM service at: {base_url}")
@@ -273,7 +272,7 @@ class VLLMJudge:
         print(f"Using model: {self.model_name}")
 
     def judge(self, question: str, model_output: str, ground_truth: str = "", split: str = "image") -> Tuple[float, str]:
-        """对单个样本进行评分，返回: (score, raw_response)"""
+        """Score one sample; returns (score, raw_response)."""
         prompt = PROMPTS.get(split, PROMPTS["image"])
         eval_input = json.dumps({
             "question": question,
@@ -302,7 +301,7 @@ class VLLMJudge:
 
     @staticmethod
     def _extract_score(text: str) -> float:
-        """从响应文本中提取分数"""
+        """Parse a score in [0, 1] from judge output text."""
         for pat in [r"\b([01](?:\.\d+)?)\b", r"\b(0?\.\d+)\b"]:
             m = re.findall(pat, text)
             if m:
@@ -322,7 +321,7 @@ class VLLMJudge:
         return 0.0
 
 
-# ============ MC 评测函数 ============
+# ============ Multiple-choice evaluation ============
 
 def evaluate_mc_single_prediction(
     item: dict,
@@ -332,11 +331,11 @@ def evaluate_mc_single_prediction(
     pre_extracted: Optional[str] = None,
     gt_by_qid: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> dict:
-    """评测单个 MC 预测。若提供 pre_extracted（如 think 任务经 LLM 抽取的 A–D），则不再做正则提取。"""
+    """Evaluate one MC prediction; if pre_extracted is set, skip regex extraction."""
     full_question = item.get("question", "")
     model_output = item.get("model_output", "") or item.get("raw_model_output", "")
     
-    # 从 ground truth 列表获取正确答案（优先 question_id 对齐，便于同一 xlsx 内混合子集）
+    # Resolve GT via question_id when possible (avoids offset errors with partial lists / mixed xlsx rows)
     question_id = ""
     ground_truth = ""
     gt_entry: Dict[str, str] = {}
@@ -345,7 +344,7 @@ def evaluate_mc_single_prediction(
         if qid and qid in gt_by_qid:
             gt_entry = gt_by_qid[qid]
         elif qid:
-            # 有 id 但不在 GT 表里（不应再按 idx 错位对齐）
+            # ID present but missing from GT: do not fall back to index alignment
             gt_entry = {}
         elif gt_list and idx < len(gt_list):
             gt_entry = gt_list[idx]
@@ -355,7 +354,7 @@ def evaluate_mc_single_prediction(
         question_id = str(gt_entry.get("question_id", qid or f"{idx:03d}-{idx:02d}"))
         ground_truth = gt_entry.get("answer", "")
     
-    # 提取模型预测的答案
+    # Extract model-predicted answer
     if pre_extracted is not None:
         pe = (pre_extracted or "").strip().upper()
         extracted_prediction = pe if pe in ("A", "B", "C", "D") else ""
@@ -364,7 +363,6 @@ def evaluate_mc_single_prediction(
     else:  # video
         extracted_prediction = extract_answer(model_output)
     
-    # 判断是否正确
     is_correct = extracted_prediction.upper() == ground_truth.upper() if ground_truth else False
     
     return {
@@ -384,56 +382,26 @@ def evaluate_mc_file(
     gt_list: List[Dict[str, str]],
     split: str = "image",
     *,
-    think_extract: bool = False,
     match_by_question_id: bool = True,
-    base_url: str = "http://127.0.0.1:23333/v1",
-    model_name: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
-    num_workers: int = 8,
-    api_key: str = "EMPTY",
 ) -> dict:
-    """评测单个 MC JSON 文件并保存结果。think_extract=True 时用 LLM（mc_think_extract）从含推理的输出中抽取选项。
-    默认 match_by_question_id=True：按 question_id 与官方 GT 对齐；条目数少于 GT 时不会错位。
-    无 question_id 的条目仍按列表下标回退（兼容旧 JSON）。"""
-    from mc_think_extract import ThinkMCAnswerExtractor
+    """Evaluate one MC JSON file and write results.
 
+    By default match_by_question_id=True aligns predictions to official GT via question_id
+    so fewer rows than GT do not shift alignment. Rows without question_id still fall back
+    to list index (legacy JSON)."""
     with open(input_file, "r", encoding="utf-8") as f:
         preds = json.load(f)
 
     gt_by_qid = index_gt_by_question_id(gt_list) if match_by_question_id else None
 
-    pre_extracted_list: Optional[List[Optional[str]]] = None
-    if think_extract:
-        extractor = ThinkMCAnswerExtractor(
-            base_url=base_url, model_name=model_name, api_key=api_key
-        )
-        n = len(preds)
-        pre_extracted_list = [""] * n
-        if n > 0:
-
-            def _one(i: int) -> Tuple[int, str]:
-                text = preds[i].get("model_output", "") or preds[i].get("raw_model_output", "") or ""
-                return i, extractor.extract(text)
-
-            with ThreadPoolExecutor(max_workers=num_workers) as ex:
-                futs = [ex.submit(_one, i) for i in range(n)]
-                for fut in tqdm(
-                    as_completed(futs),
-                    total=n,
-                    desc=f"Think MC extract {os.path.basename(input_file)}",
-                    leave=False,
-                ):
-                    i, letter = fut.result()
-                    pre_extracted_list[i] = letter
-    
     total_num = len(preds)
     valid_num = 0
     correct_num = 0
     results = []
     
     for idx, item in enumerate(tqdm(preds, desc=f"Evaluating {os.path.basename(input_file)}", leave=False)):
-        pe = pre_extracted_list[idx] if pre_extracted_list is not None else None
         result = evaluate_mc_single_prediction(
-            item, idx, gt_list, split, pre_extracted=pe, gt_by_qid=gt_by_qid
+            item, idx, gt_list, split, pre_extracted=None, gt_by_qid=gt_by_qid
         )
         results.append(result)
         
@@ -450,7 +418,7 @@ def evaluate_mc_file(
         "valid_num": valid_num,
         "correct_num": correct_num,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "mc_extract": "think_llm" if think_extract else "regex",
+        "mc_extract": "regex",
         "model_predictons": [
             {
                 "question_id": r["question_id"],
@@ -476,7 +444,7 @@ def evaluate_mc_file(
     }
 
 
-# ============ OE 评测函数 ============
+# ============ Open-ended evaluation ============
 
 def judge_oe_single_item(
     judge: VLLMJudge, 
@@ -486,15 +454,15 @@ def judge_oe_single_item(
     split: str = "image",
     gt_by_qid: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> Tuple[dict, float, bool]:
-    """评分单个 OE 数据项"""
+    """Judge a single open-ended item."""
     full_question = item.get("question", "")
     model_output = item.get("model_output", "") or item.get("raw_model_output", "")
     
-    # 优先使用数据中已有的 ground_truth
+    # Prefer GT packaged in the prediction row
     ground_truth = item.get("ground_truth", "") or item.get("answer", "")
     question_id = item.get("question_id", "")
     
-    # 如果数据中没有 ground_truth，按 question_id 或索引从 gt_list 查找
+    # Otherwise look up gt_list by question_id or row index
     if not ground_truth:
         qid = str(question_id or "").strip()
         if gt_by_qid is not None:
@@ -552,7 +520,7 @@ def process_oe_json_file(
     split: str = "image",
     match_by_question_id: bool = True,
 ) -> dict:
-    """处理单个 OE JSON 文件。默认按 question_id 对齐 GT，避免预测条数少于官方时错位判分。"""
+    """Judge one OE JSON file; by default align GT by question_id to avoid score shifts."""
     with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     
@@ -562,7 +530,7 @@ def process_oe_json_file(
 
     gt_by_qid = index_gt_by_question_id(gt_list) if (match_by_question_id and gt_list) else None
     
-    # 统计需要评分的数据
+    # Rows that still need judging
     items_to_judge = []
     items_skipped = 0
     for idx, item in enumerate(data):
@@ -585,12 +553,12 @@ def process_oe_json_file(
             "avg_score": None
         }
     
-    # 并发评分
+    # Parallel judging
     total_score = 0.0
     valid_count = 0
     
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        # 使用字典来跟踪 future 和原始索引的映射
+        # Map each Future back to its original row index
         future_to_idx = {}
         futures = []
         for idx, item in items_to_judge:
@@ -608,10 +576,9 @@ def process_oe_json_file(
                 total_score += score
                 valid_count += 1
     
-    # 计算平均分
     avg_score = total_score / valid_count if valid_count > 0 else 0.0
     
-    # 保存结果
+    # Persist judged JSON
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -626,7 +593,7 @@ def process_oe_json_file(
     }
 
 
-# ============ 批量评测函数 ============
+# ============ Batch evaluation ============
 
 def bulk_evaluate_mc(
     input_dir: str,
@@ -636,20 +603,14 @@ def bulk_evaluate_mc(
     gt_list: List[Dict[str, str]],
     split: str = "image",
     layer_range: Optional[Tuple[int, int]] = None,
-    *,
-    think_extract: bool = False,
-    base_url: str = "http://127.0.0.1:23333/v1",
-    model_name: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
-    num_workers: int = 8,
-    api_key: str = "EMPTY",
 ):
-    """批量评测 MC 格式的文件"""
+    """Batch-evaluate MC result files under input_dir."""
     files = sorted(glob.glob(os.path.join(input_dir, pattern)))
     if not files:
         print(f"[Warning] No files matched: {os.path.join(input_dir, pattern)}")
         return []
 
-    # 过滤文件：只保留指定层范围内的文件
+    # Optional layer filter from filename metadata
     if layer_range:
         filtered_files = []
         for fp in files:
@@ -672,11 +633,6 @@ def bulk_evaluate_mc(
             output_file=output_file,
             gt_list=gt_list,
             split=split,
-            think_extract=think_extract,
-            base_url=base_url,
-            model_name=model_name,
-            num_workers=num_workers,
-            api_key=api_key,
         )
         
         meta = parse_meta_from_filename(base)
@@ -726,13 +682,12 @@ def bulk_evaluate_oe(
     overwrite: bool = False,
     layer_range: Optional[Tuple[int, int]] = None,
 ):
-    """批量评测 OE 格式的文件"""
+    """Batch-evaluate open-ended result files."""
     files = sorted(glob.glob(os.path.join(input_dir, pattern)))
     if not files:
         print(f"[Warning] No files matched: {os.path.join(input_dir, pattern)}")
         return []
 
-    # 过滤文件
     if layer_range:
         filtered_files = []
         for fp in files:
@@ -748,7 +703,7 @@ def bulk_evaluate_oe(
     rows = []
     for fp in tqdm(files, desc=f"Bulk evaluating {input_dir}"):
         base = os.path.basename(fp)
-        # 如果输入在 01_raw 文件夹，输出到同级的 02_judged 文件夹
+        # Convention: 01_raw inputs -> sibling 02_judged outputs
         if "/01_raw/" in fp:
             output_file = fp.replace("/01_raw/", "/02_judged/").replace(".json", "_evaluated.json")
         else:
@@ -805,18 +760,16 @@ def bulk_evaluate_oe(
     return rows
 
 
-# ============ 主程序入口 ============
+# ============ CLI ============
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Unified Inst-It-Bench evaluation tool")
     
-    # 评测类型
-    parser.add_argument("--eval_type", type=str, 
-                       choices=["image_mc", "image_think_mc", "image_oe", "video_mc", "video_think_mc", "video_oe"], 
+    parser.add_argument("--eval_type", type=str,
+                       choices=["image_mc", "image_oe", "video_mc", "video_oe"],
                        required=True,
-                       help="Evaluation type (image_think_mc / video_think_mc: LLM extracts MC letter)")
+                       help="Evaluation type")
     
-    # 目录参数
     parser.add_argument("--input_dir", type=str, required=True,
                        help="Input directory containing JSON files (usually 01_raw)")
     parser.add_argument("--output_dir", type=str, default=None,
@@ -826,7 +779,6 @@ if __name__ == "__main__":
     parser.add_argument("--summary_out", type=str, default=None,
                        help="CSV file path to save summary")
     
-    # vLLM 相关参数（用于 OE）
     parser.add_argument("--base_url", type=str, default="http://localhost:8001/v1",
                        help="vLLM OpenAI API endpoint")
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-72B-Instruct-AWQ",
@@ -836,71 +788,54 @@ if __name__ == "__main__":
     parser.add_argument("--overwrite", action="store_true",
                        help="Overwrite existing scores")
     
-    # 层范围参数
     parser.add_argument("--layer_range", nargs=2, type=int, default=None,
                        help="Only evaluate layers in this range (e.g., 0 35)")
     
-    # 其他参数
     parser.add_argument("--no_load_gt", action="store_true",
                        help="Do not load ground truth from Inst-It-Bench dataset")
 
     args = parser.parse_args()
 
-    # 如果没有提供 pattern，根据 eval_type 自动设置
+    # Default glob pattern from eval_type when not provided
     if args.pattern is None:
         if args.eval_type == "image_mc":
             args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_image_mc_qa_model_name_*_model_size_*.json"
-        elif args.eval_type == "image_think_mc":
-            args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_image_think_mc_qa_model_name_*_model_size_*.json"
         elif args.eval_type == "image_oe":
             args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_image_oe_qa_model_name_*_model_size_*.json"
         elif args.eval_type == "video_mc":
             args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_video_mc_qa_model_name_*_model_size_*.json"
-        elif args.eval_type == "video_think_mc":
-            args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_video_think_mc_qa_model_name_*_model_size_*.json"
         else:  # video_oe
             args.pattern = "results_layer_*_multiplier_*_behavior_refer_type_inst_it_video_oe_qa_model_name_*_model_size_*.json"
 
-    # 设置输出目录
     if args.output_dir is None:
         if args.eval_type.endswith("_oe"):
-            # OE 格式：如果输入在 01_raw，输出到 02_judged
             if "/01_raw/" in args.input_dir or args.input_dir.endswith("01_raw"):
                 args.output_dir = args.input_dir.replace("/01_raw/", "/02_judged/").replace("01_raw", "02_judged")
             else:
                 args.output_dir = os.path.join(args.input_dir, "02_judged")
         else:
-            # MC 格式：输出到同目录
             args.output_dir = args.input_dir
 
-    # 设置 summary_out 默认路径（与 output_dir 同级）
     if args.summary_out is None:
         output_parent = os.path.dirname(args.output_dir)
-        if not output_parent:  # 如果 output_dir 是根目录，使用当前目录
+        if not output_parent:  # output_dir is root -> use cwd
             output_parent = "."
         args.summary_out = os.path.join(output_parent, "summary.csv")
 
-    # 加载 ground truth
     gt_list = None
     if not args.no_load_gt:
         if args.eval_type == "image_mc":
-            gt_list = load_inst_it_image_mc_ground_truth()
-        elif args.eval_type == "image_think_mc":
             gt_list = load_inst_it_image_mc_ground_truth()
         elif args.eval_type == "image_oe":
             gt_list = load_inst_it_image_oe_ground_truth()
         elif args.eval_type == "video_mc":
             gt_list = load_inst_it_video_mc_ground_truth()
-        elif args.eval_type == "video_think_mc":
-            gt_list = load_inst_it_video_mc_ground_truth()
         else:  # video_oe
             gt_list = load_inst_it_video_oe_ground_truth()
 
-    # 根据评测类型调用相应的函数
     if args.eval_type.endswith("_mc"):
-        # MC 评测
+        # Multiple-choice evaluation
         split = "image" if args.eval_type.startswith("image") else "video"
-        think_extract = args.eval_type in ("image_think_mc", "video_think_mc")
         bulk_evaluate_mc(
             input_dir=args.input_dir,
             output_dir=args.output_dir,
@@ -909,13 +844,8 @@ if __name__ == "__main__":
             gt_list=gt_list or [],
             split=split,
             layer_range=tuple(args.layer_range) if args.layer_range else None,
-            think_extract=think_extract,
-            base_url=args.base_url,
-            model_name=args.model_name,
-            num_workers=args.num_workers,
         )
     else:
-        # OE 评测
         split = "image" if args.eval_type.startswith("image") else "video"
         judge = VLLMJudge(base_url=args.base_url, model_name=args.model_name)
         bulk_evaluate_oe(

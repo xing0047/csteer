@@ -31,21 +31,20 @@ def get_index(bound, fps, max_frame, first_idx=0, num_segments=32):
 
 def mask_to_bbox(mask: np.ndarray) -> Union[Tuple[int, int, int, int], None]:
     """
-    从二值掩码中提取边界框
-    
+    Extract axis-aligned bounding box from a binary mask.
+
     Args:
-        mask: 二值掩码数组 (0和1组成)
-        
+        mask: Binary array of 0s and 1s.
+
     Returns:
-        边界框坐标 (x_min, y_min, x_max, y_max) 或 None（如果没有找到1）
+        (x_min, y_min, x_max, y_max) or None if no foreground (1) pixels.
     """
-    # 找到所有值为1的像素位置
     coords = np.where(mask == 1)
     
     if len(coords[0]) == 0:
-        return None  # 没有找到任何1
+        return None
     
-    # 获取最小和最大坐标
+    # Min/max coordinates of foreground
     y_min, y_max = coords[0].min(), coords[0].max()
     x_min, x_max = coords[1].min(), coords[1].max()
     

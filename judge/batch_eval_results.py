@@ -1,17 +1,13 @@
 """
 Batch-evaluate all steering / API / gar_qwen3vl / VLMEvalKit xlsx results under RESULT/.
 
-- Traversal order (phase): noref → gar_qwen3vl → gemini → o3 → internvl3-78b (xlsx) →
+- Traversal order (phase): noref → gar_qwen3vl → gemini → o3 →
   lam0.25 → lam0.5 → lam2.0 → cross_model_steer → pixelrefer_mdvp →
   pixelrefer_osprey → no_marker → (everything else last).
 
 - Every JSON is evaluated and metrics saved; files that share the same
   (task type, multiplier, model_name, model_size, parent experiment folder) but
   differ only by layer get a group summary with the best layer and max metric.
-
-- InternVL3-78B xlsx under `internvl3-78b-api/`: if rows carry Inst-It task labels (type/dataset),
-  one sheet can mix image/video and MC/OE; metrics are computed per subtask and written to
-  `*.metrics.<task>.json` plus a combined `*.metrics.json` with `by_task`.
 
 Usage (from repo root):
   python JUDGE/batch_eval_results.py --result-root ../RESULT --out-dir ../RESULT/_eval_metrics
@@ -50,7 +46,6 @@ from evaluate_gar import (
 )
 from evaluate_inst_it import (
     VLLMJudge,
-    extract_characters_regex,
     evaluate_mc_file,
     load_inst_it_image_mc_ground_truth,
     load_inst_it_image_oe_ground_truth,
@@ -63,7 +58,6 @@ from eval_suite import (
     eval_cvbench,
     eval_vip_bbox_lmdeploy,
 )
-from eval_blink import extract_answer
 
 
 # ---------------------------------------------------------------------------
@@ -75,7 +69,6 @@ PHASE_CHOICES = (
     "gar_qwen3vl",
     "gemini",
     "o3",
-    "internvl",
     "lam0.25",
     "lam0.5",
     "lam2.0",
@@ -93,7 +86,6 @@ ALL_TASK_LABELS = (
     "inst_it_video_mc_qa",
     "inst_it_image_oe_qa",
     "inst_it_video_oe_qa",
-    "inst_it_mixed_xlsx",
     "gar_image_mc_qa",
     "gar_image_simple_oe_qa",
     "gar_image_detail_oe_qa",
@@ -108,7 +100,6 @@ TASK_TOKEN_ALIASES: Dict[str, Set[str]] = {
         "inst_it_video_mc_qa",
         "inst_it_image_oe_qa",
         "inst_it_video_oe_qa",
-        "inst_it_mixed_xlsx",
     },
     "inst_mc": {"inst_it_image_mc_qa", "inst_it_video_mc_qa"},
     "inst_oe": {"inst_it_image_oe_qa", "inst_it_video_oe_qa"},
@@ -127,27 +118,23 @@ def phase_info(path: str) -> Tuple[int, Optional[str]]:
         return 2, "gemini"
     if "o3_api" in p or re.search(r"/o3/", p):
         return 3, "o3"
-    if p.endswith(".xlsx") and "internvl3-78b-api" in p:
-        return 4, "internvl"
     if "lam0.25" in p:
-        return 5, "lam0.25"
+        return 4, "lam0.25"
     if "lam0.5" in p:
-        return 6, "lam0.5"
+        return 5, "lam0.5"
     if "lam2.0" in p:
-        return 7, "lam2.0"
+        return 6, "lam2.0"
     if "cross_model_steer" in p:
-        return 8, "cross_model"
+        return 7, "cross_model"
     if "pixelrefer_mdvp" in p:
-        return 9, "pixelrefer_mdvp"
+        return 8, "pixelrefer_mdvp"
     if "pixelrefer_osprey" in p:
-        return 10, "pixelrefer_osprey"
+        return 9, "pixelrefer_osprey"
     if "no_marker" in p:
-        return 11, "no_marker"
+        return 10, "no_marker"
     if "noref" in p and "no_marker" not in p:
         return 0, "noref"
-    if "internvl3-78b-api" in p:
-        return 4, "internvl"
-    return 12, None
+    return 11, None
 
 
 def phase_rank(path: str) -> int:
@@ -199,8 +186,6 @@ def _task_label_for_xlsx(path: Path) -> str:
         return "blink_image_mc_qa"
     if "VIP" in s or "VIPBENCH" in s.replace(" ", ""):
         return "vip_image_oe_qa"
-    if "INST" in s:
-        return "inst_it_mixed_xlsx"
     return "xlsx"
 
 
@@ -225,7 +210,6 @@ def parse_phase_task_rules(specs: Optional[Sequence[str]]) -> Dict[str, Set[str]
     Parse --phase-task entries like:
       gemini=blink,vip
       o3=inst,gar
-      internvl=inst_it_mixed_xlsx
     """
     out: Dict[str, Set[str]] = {}
     if not specs:
@@ -548,304 +532,6 @@ def eval_one_json(
     return {"error": f"unsupported_task:{task}"}, None
 
 
-# ---------------------------------------------------------------------------
-# VLMEvalKit xlsx
-# ---------------------------------------------------------------------------
-
-INST_IT_XLSX_TASK_ORDER = (
-    "inst_it_image_mc_qa",
-    "inst_it_image_oe_qa",
-    "inst_it_video_mc_qa",
-    "inst_it_video_oe_qa",
-)
-
-# VLMEvalKit / common sheet strings -> our task id (substring match on normalized row text)
-_INST_IT_VLME_HINTS: Tuple[Tuple[str, str], ...] = (
-    ("video_multi_choice", "inst_it_video_mc_qa"),
-    ("video_multichoice", "inst_it_video_mc_qa"),
-    ("video_open_ended", "inst_it_video_oe_qa"),
-    ("video_open", "inst_it_video_oe_qa"),
-    ("image_multi_choice", "inst_it_image_mc_qa"),
-    ("image_multichoice", "inst_it_image_mc_qa"),
-    ("image_open_ended", "inst_it_image_oe_qa"),
-    ("image_open", "inst_it_image_oe_qa"),
-)
-
-
-def _is_internvl_xlsx_path(path: Path) -> bool:
-    return "internvl3-78b-api" in str(path).replace("\\", "/").lower()
-
-
-def inst_modality_from_xlsx_filename(stem: str) -> Optional[str]:
-    """e.g. InternVL3-78B-API_Inst_It_Video -> video; ..._Inst_It_Image -> image."""
-    u = stem.upper().replace("-", "_")
-    if "INST_IT_VIDEO" in u or ("INST" in u and "VIDEO" in u and "IMAGE" not in u):
-        return "video"
-    if "INST_IT_IMAGE" in u or ("INST" in u and "IMAGE" in u and "VIDEO" not in u):
-        return "image"
-    return None
-
-
-def _row_text_blob(row: Dict[str, Any]) -> str:
-    parts: List[str] = []
-    for _k, v in row.items():
-        if v is None:
-            continue
-        parts.append(str(v).lower())
-    return " ".join(parts)
-
-
-def _answer_looks_like_mc_option(ans: Any) -> bool:
-    """Inst-It MC ground-truth letter; OE answers are usually longer."""
-    if ans is None or (isinstance(ans, float) and str(ans) == "nan"):
-        return False
-    a = str(ans).strip().upper()
-    if len(a) == 1 and a in "ABCD":
-        return True
-    m = re.match(r"^([ABCD])[\s\.\)\:]", a)
-    return bool(m)
-
-
-def infer_inst_it_task_from_row(
-    row: Dict[str, Any],
-    modality_hint: Optional[str] = None,
-) -> Optional[str]:
-    """Infer Inst-It subtask from VLMEvalKit row (type / dataset / full-row text / filename hint)."""
-    raw = (
-        row.get("type")
-        or row.get("dataset")
-        or row.get("category")
-        or row.get("dataset_name")
-        or ""
-    )
-    t = re.sub(r"\s+", "_", str(raw).strip().lower()).replace("-", "_")
-    if t:
-        for task in INST_IT_XLSX_TASK_ORDER:
-            if task in t:
-                return task
-        if "inst_it" in t or "inst-it" in t or "instit" in t:
-            video = "video" in t
-            mc = "mc" in t or "multi" in t or "choice" in t or "think" in t
-            oe = "oe" in t or "open" in t
-            if video:
-                if mc:
-                    return "inst_it_video_mc_qa"
-                if oe:
-                    return "inst_it_video_oe_qa"
-            else:
-                if mc:
-                    return "inst_it_image_mc_qa"
-                if oe:
-                    return "inst_it_image_oe_qa"
-
-    blob = _row_text_blob(row)
-    nb = blob.replace("-", "_").replace(" ", "_")
-    for task in INST_IT_XLSX_TASK_ORDER:
-        if task in nb:
-            return task
-    for needle, task in _INST_IT_VLME_HINTS:
-        if needle in nb:
-            return task
-
-    if modality_hint in ("image", "video"):
-        ans = row.get("answer") or row.get("ground_truth") or row.get("label") or ""
-        if _answer_looks_like_mc_option(ans):
-            return f"inst_it_{modality_hint}_mc_qa"
-        if str(ans).strip():
-            return f"inst_it_{modality_hint}_oe_qa"
-    return None
-
-
-def split_inst_rows_by_task(
-    rows: List[Dict[str, Any]],
-    modality_hint: Optional[str] = None,
-) -> Tuple[Dict[str, List[Dict[str, Any]]], List[Dict[str, Any]]]:
-    buckets: Dict[str, List[Dict[str, Any]]] = {k: [] for k in INST_IT_XLSX_TASK_ORDER}
-    unknown: List[Dict[str, Any]] = []
-    for row in rows:
-        task = infer_inst_it_task_from_row(row, modality_hint=modality_hint)
-        if task is None:
-            unknown.append(row)
-        else:
-            buckets[task].append(row)
-    out = {k: v for k, v in buckets.items() if v}
-    return out, unknown
-
-
-def _load_gt_for_inst_task(task: str) -> List[Dict[str, str]]:
-    if task == "inst_it_image_mc_qa":
-        return load_inst_it_image_mc_ground_truth()
-    if task == "inst_it_video_mc_qa":
-        return load_inst_it_video_mc_ground_truth()
-    if task == "inst_it_image_oe_qa":
-        return load_inst_it_image_oe_ground_truth()
-    if task == "inst_it_video_oe_qa":
-        return load_inst_it_video_oe_ground_truth()
-    return []
-
-
-def primary_metric_inst_mixed(by_task: Dict[str, Any]) -> Optional[float]:
-    """Average of MC accuracy (0–100) and OE avg_score*100 across present tasks."""
-    vals: List[float] = []
-    for v in by_task.values():
-        if not isinstance(v, dict) or v.get("error"):
-            continue
-        if isinstance(v.get("accuracy"), (int, float)):
-            vals.append(float(v["accuracy"]))
-        elif isinstance(v.get("avg_score"), (int, float)):
-            vals.append(float(v["avg_score"]) * 100.0)
-    if not vals:
-        return None
-    return sum(vals) / len(vals)
-
-
-def eval_internvl_inst_mixed_xlsx(
-    xlsx_path: Path,
-    out_metrics: Path,
-    tmp_root: Path,
-    base_url: str,
-    judge_model: str,
-    num_workers: int,
-    rows: List[Dict[str, Any]],
-) -> Tuple[Any, Optional[float]]:
-    """One xlsx with multiple Inst-It rows: split by task, metrics per task + combined file."""
-    mh = inst_modality_from_xlsx_filename(xlsx_path.stem)
-    buckets, unknown = split_inst_rows_by_task(rows, modality_hint=mh)
-
-    # InternVL3-78B "Inst-It Video/Image" sheets may not contain per-row task labels.
-    # Empirically they're ordered as:
-    #   - Inst-It Video: first 1001 rows = MC, next 1001 rows = OE
-    #   - Inst-It Image: first 1036 rows = MC, next 1036 rows = OE
-    # To avoid mis-bucketing, force split based on filename + row count.
-    stem_u = xlsx_path.stem.upper().replace("-", "_")
-    if mh == "video" and ("INST_IT_VIDEO" in stem_u):
-        mc_key = "inst_it_video_mc_qa"
-        oe_key = "inst_it_video_oe_qa"
-        n = 1001
-        if len(rows) >= 2 * n:
-            buckets = {k: [] for k in INST_IT_XLSX_TASK_ORDER}
-            buckets[mc_key] = rows[:n]
-            buckets[oe_key] = rows[n : 2 * n]
-            unknown = rows[2 * n :] if len(rows) > 2 * n else []
-    elif mh == "image" and ("INST_IT_IMAGE" in stem_u):
-        mc_key = "inst_it_image_mc_qa"
-        oe_key = "inst_it_image_oe_qa"
-        n = 1036
-        if len(rows) >= 2 * n:
-            buckets = {k: [] for k in INST_IT_XLSX_TASK_ORDER}
-            buckets[mc_key] = rows[:n]
-            buckets[oe_key] = rows[n : 2 * n]
-            unknown = rows[2 * n :] if len(rows) > 2 * n else []
-    if not buckets:
-        return {"error": "no_inst_rows_classified", "xlsx": str(xlsx_path)}, None
-
-    os.makedirs(out_metrics.parent, exist_ok=True)
-    tmp_root.mkdir(parents=True, exist_ok=True)
-
-    by_task: Dict[str, Any] = {}
-    per_task_files: Dict[str, str] = {}
-
-    for task in INST_IT_XLSX_TASK_ORDER:
-        sub = buckets.get(task) or []
-        if not sub:
-            continue
-        tmp_json = tmp_root / f"{xlsx_path.stem}_{task}.json"
-        with open(tmp_json, "w", encoding="utf-8") as f:
-            json.dump(sub, f, ensure_ascii=False, indent=2)
-
-        sub_metrics = out_metrics.parent / f"{out_metrics.stem}.{task}.json"
-
-        if task.endswith("_mc_qa"):
-            split = "image" if "image" in task else "video"
-
-            # InternVL VLMEvalKit xlsx already carries GT in the "answer" column for MC.
-            # Use in-sheet GT to avoid any mismatch/offset with external datasets.
-            if _is_internvl_xlsx_path(xlsx_path):
-                total_num = len(sub)
-                valid_num = 0
-                correct_num = 0
-                for row in sub:
-                    if not isinstance(row, dict):
-                        continue
-                    gt = str(row.get("answer", "") or row.get("ground_truth", "") or "").strip().upper()
-                    if not gt:
-                        continue
-                    model_output = str(row.get("model_output") or row.get("raw_model_output") or "").strip()
-                    pred = (
-                        extract_answer(model_output)
-                        if split == "video"
-                        else extract_characters_regex(model_output)
-                    ).strip().upper()
-                    valid_num += 1
-                    if pred and pred == gt:
-                        correct_num += 1
-                acc = (correct_num / valid_num * 100.0) if valid_num > 0 else 0.0
-                r = {
-                    "accuracy": acc,
-                    "total_num": total_num,
-                    "valid_num": valid_num,
-                    "correct_num": correct_num,
-                    "mc_extract": "regex_first_letter",
-                    "gt_source": "xlsx_answer",
-                }
-                payload = {"task": task, "split": split, "think_extract": False, "mc_eval": r, "mc_eval_file": None}
-            else:
-                gt = _load_gt_for_inst_task(task)
-                mc_out = tmp_root / f"{xlsx_path.stem}_{task}_mc_eval.json"
-                r = evaluate_mc_file(
-                    str(tmp_json),
-                    str(mc_out),
-                    gt,
-                    split=split,
-                    match_by_question_id=True,
-                )
-                payload = {"task": task, "split": split, "think_extract": False, "mc_eval": r, "mc_eval_file": str(mc_out)}
-            with open(sub_metrics, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-            by_task[task] = r
-            per_task_files[task] = str(sub_metrics)
-        else:
-            split = "image" if "image" in task else "video"
-            gt = _load_gt_for_inst_task(task)
-            judge = VLLMJudge(base_url=base_url, model_name=judge_model)
-            oe_out = tmp_root / f"{xlsx_path.stem}_{task}_evaluated.json"
-            oe_ret = process_oe_json_file(
-                str(tmp_json),
-                str(oe_out),
-                judge,
-                num_workers=num_workers,
-                overwrite=True,
-                gt_list=gt,
-                split=split,
-                match_by_question_id=True,
-            )
-            payload = {
-                "task": task,
-                "split": split,
-                "oe_eval": oe_ret,
-                "evaluated_json": str(oe_out),
-            }
-            with open(sub_metrics, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-            by_task[task] = oe_ret
-            per_task_files[task] = str(sub_metrics)
-
-    combined = {
-        "xlsx_kind": "internvl_inst_mixed",
-        "source_xlsx": str(xlsx_path),
-        "modality_hint_from_filename": mh,
-        "by_task": by_task,
-        "per_task_summary_files": per_task_files,
-        "unclassified_row_count": len(unknown),
-        "unclassified_sample": unknown[:8],
-    }
-    with open(out_metrics, "w", encoding="utf-8") as f:
-        json.dump(combined, f, ensure_ascii=False, indent=2, default=str)
-
-    pm = primary_metric_inst_mixed(by_task)
-    return combined, pm
-
-
 def xlsx_to_eval(
     xlsx_path: Path,
     out_metrics: Path,
@@ -891,17 +577,6 @@ def xlsx_to_eval(
         row = summ.get("per_capability_percent", {})
         pm = float(row.get("total", 0)) if isinstance(row, dict) else None
         return summ, pm
-
-    if _is_internvl_xlsx_path(xlsx_path):
-        return eval_internvl_inst_mixed_xlsx(
-            xlsx_path,
-            out_metrics,
-            tmp_root,
-            base_url,
-            judge_model,
-            num_workers,
-            rows,
-        )
 
     if "INST" in stem and "VIDEO" in stem:
         gt = load_inst_it_video_mc_ground_truth()

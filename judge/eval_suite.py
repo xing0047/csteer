@@ -14,10 +14,6 @@ Examples (from repo root):
   python JUDGE/eval_suite.py inst_it --mode image_oe --input ../RESULT/.../results_....json --output judged.json
   python JUDGE/eval_suite.py gar --kind mc --input ../RESULT/.../results_....json
   python JUDGE/eval_suite.py gar --kind simple --input ... --output gar_simple_metrics.json
-
-InternVL-78B / VLMEvalKit (.xlsx): convert first —
-  python JUDGE/xlsx_to_steering_json.py --input RESULT_VLMEvalKit/foo.xlsx --output foo.json
-  (see JUDGE/xlsx_to_steering_json.py --help; use --dry-run to inspect columns)
 """
 
 from __future__ import annotations

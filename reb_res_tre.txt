@@ -1,0 +1,634 @@
+../RESULT
+├── refer
+├── InternVL3-78B-API
+│   ├── InternVL3-78B-API_BLINK.xlsx
+│   ├── InternVL3-78B-API_Inst_It_Image.xlsx
+│   ├── InternVL3-78B-API_Inst_It_Video.xlsx
+│   └── InternVL3-78B-API_VIPBench_Bbox.xlsx
+│   ├── qwen3vl_8b
+│   │   ├── inst_it_image_mo_dev_01_noref
+│   │   │	├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+│   │	│   	├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+│   │ 	│   	├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+│   │	│   	├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+│   │	│   	├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_oe_qa_model_name_qwen3vl_model_size_8b.json
+│   │	│   	└── results_layer_00_multiplier_0.0_behavior_refer_type_vip_image_oe_qa_model_name_qwen3vl_model_size_8b.json
+│   │	├── noref_dev_noref
+│   │	│	├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_mc_qa_model_name_qwen3vl_model_size_8b.json
+│   │	│	└── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_oe_qa_model_name_qwen3vl_model_size_8b.json
+        ├── lam0.25
+        │   ├── results_layer_00_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_0.25_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_0.25_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_34_multiplier_0.25_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+	├── lam0.5
+        │   ├── results_layer_00_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_0.5_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_0.5_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_34_multiplier_0.5_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        ├── lam2.0
+        │   ├── results_layer_00_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_00_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_02_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_04_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_06_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_08_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_10_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_12_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_14_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_16_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_18_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_20_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_22_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_24_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_26_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_28_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_30_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_32_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_2.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.jsonl
+        │   ├── results_layer_34_multiplier_2.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_34_multiplier_2.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        ├── no_marker
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        ├── pixelrefer_mdvp
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        ├── pixelrefer_osprey
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_qwen3vl_model_size_8b.json
+        │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_model_name_qwen3vl_model_size_8b.json
+        │   └── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_qwen3vl_model_size_8b.json
+│   ├── internvl3_5_8b
+│   │   ├── noref_noref
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_detail_oe_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_mc_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_gar_image_simple_oe_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_mc_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_oe_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_mc_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_oe_qa_model_name_internvl3_5_model_size_8b.json
+│   │   │   ├── results_layer_00_multiplier_0.0_behavior_refer_type_vip_image_oe_qa_model_name_internvl3_5_model_size_8b.json
+    │   ├── cross_model_steer
+    │   │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_00_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_01_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_02_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_03_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_04_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_05_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_06_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_07_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_08_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_09_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_10_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_11_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_12_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_13_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_14_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_15_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_16_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_17_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_18_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_19_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_20_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_21_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_22_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_23_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_24_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_25_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_26_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_27_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_28_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_29_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_30_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_31_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_32_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_33_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_34_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_detail_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   ├── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_mc_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+    │   │   └── results_layer_35_multiplier_1.0_behavior_refer_type_gar_image_simple_oe_qa_override_vector_model_qwen3vl_model_name_internvl3_5_model_size_8b.json
+│   ├── gemini-2.5-pro_api
+│   │   └── gemini-2.5-pro
+│   │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_blink_image_mc_qa_model_name_gemini-2.5-pro_model_size_api.json
+│   │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_mc_qa_model_name_gemini-2.5-pro_model_size_api.json
+│   │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_oe_qa_model_name_gemini-2.5-pro_model_size_api.json
+│   │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_mc_qa_model_name_gemini-2.5-pro_model_size_api.json
+│   │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_oe_qa_model_name_gemini-2.5-pro_model_size_api.json
+│   │       └── results_layer_00_multiplier_0.0_behavior_refer_type_vip_image_oe_qa_model_name_gemini-2.5-pro_model_size_api.json
+    ├── o3_api
+    │   └── o3
+    │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_blink_image_mc_qa_model_name_o3_model_size_api.json
+    │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_mc_qa_model_name_o3_model_size_api.json
+    │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_image_oe_qa_model_name_o3_model_size_api.json
+    │       ├── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_mc_qa_model_name_o3_model_size_api.json
+    │       └── results_layer_00_multiplier_0.0_behavior_refer_type_inst_it_video_oe_qa_model_name_o3_model_size_api.json
+    ├── internvl3_78b_api
+    	├── 
+├── gar_qwen3vl
+│   └── 8b
+│       ├── results_gar_detailed.json
+│       ├── results_gar_mc.json
+│       └── results_gar_simple.json
+

@@ -37,7 +37,7 @@ def load_model(model_type: str, **kwargs):
     model_type = model_type.lower()
     
     if model_type == "vipllava":
-        from utils.wrappers.vipllava_wrapper import ViPLLaVA_Wrapper
+        from wrappers.vipllava_wrapper import ViPLLaVA_Wrapper
         return ViPLLaVA_Wrapper(
             model_path=kwargs.get("model_path", "mucai/vip-llava-7b"),
             device=kwargs.get("device"),
@@ -46,7 +46,7 @@ def load_model(model_type: str, **kwargs):
         )
     
     elif model_type == "sa2va":
-        from utils.wrappers.sa2va_wrapper import Sa2VA_Wrapper
+        from wrappers.sa2va_wrapper import Sa2VA_Wrapper
         return Sa2VA_Wrapper(
             model_path=kwargs.get("model_path", "ByteDance/Sa2VA-Qwen3-VL-4B"),
             device=kwargs.get("device"),
@@ -54,7 +54,7 @@ def load_model(model_type: str, **kwargs):
         )
     
     # elif model_type == "sa2va_qwen3vl":
-    #     from utils.wrappers.sa2va_wrapper import Sa2VA_Qwen3VL_Wrapper
+    #     from wrappers.sa2va_wrapper import Sa2VA_Qwen3VL_Wrapper
     #     return Sa2VA_Qwen3VL_Wrapper(
     #         size=kwargs.get("model_size", "4b"),
     #         device=kwargs.get("device"),
@@ -62,7 +62,7 @@ def load_model(model_type: str, **kwargs):
     #     )
     
     # elif model_type == "sa2va_qwen25vl":
-    #     from utils.wrappers.sa2va_wrapper import Sa2VA_Qwen25VL_Wrapper
+    #     from wrappers.sa2va_wrapper import Sa2VA_Qwen25VL_Wrapper
     #     return Sa2VA_Qwen25VL_Wrapper(
     #         size=kwargs.get("model_size", "7b"),
     #         device=kwargs.get("device"),
@@ -70,7 +70,7 @@ def load_model(model_type: str, **kwargs):
     #     )
     
     # elif model_type == "sa2va_internvl":
-    #     from utils.wrappers.sa2va_wrapper import Sa2VA_InternVL_Wrapper
+    #     from wrappers.sa2va_wrapper import Sa2VA_InternVL_Wrapper
     #     return Sa2VA_InternVL_Wrapper(
     #         size=kwargs.get("model_size", "8b"),
     #         device=kwargs.get("device"),
@@ -78,7 +78,7 @@ def load_model(model_type: str, **kwargs):
     #     )
     
     # elif model_type == "qwen3vl":
-    #     from utils.wrappers.qwen3vl_wrapper import Qwen3VL_Wrapper
+    #     from wrappers.qwen3vl_wrapper import Qwen3VL_Wrapper
     #     return Qwen3VL_Wrapper(
     #         name="qwen3vl",
     #         size=kwargs.get("model_size", "8b"),

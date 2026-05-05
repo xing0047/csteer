@@ -1,6 +1,6 @@
-from .wrappers.internvl3_5_wrapper import InternVL3_5_Wrapper
-from .wrappers.qwen3vl_wrapper import Qwen3VL_Wrapper
-from .wrappers.openai_wrapper import OpenAIWrapper
+from wrappers.internvl3_5_wrapper import InternVL3_5_Wrapper
+from wrappers.qwen3vl_wrapper import Qwen3VL_Wrapper
+from wrappers.openai_wrapper import OpenAIWrapper
 
 model_to_wrapper_map = {
     'internvl3_5': {

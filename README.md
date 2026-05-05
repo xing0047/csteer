@@ -5,7 +5,7 @@ Referring Multiple Regions with Large Multimodal Models via Contextual Latent St
 
 <h5 align="center">
 
-[![arXiv](https://img.shields.io/badge/Arxiv-2410.15926-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2410.15926) <a href="https://huggingface.co/papers/2410.15926"></a> <br>
+[![arXiv](https://img.shields.io/badge/Arxiv-2410.15926-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2605.01827) <a href="https://huggingface.co/papers/2605.01827"></a> <br>
 
 ## 🎉 News
 

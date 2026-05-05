@@ -418,6 +418,108 @@ def compute_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     return metrics
 
 
+DEFAULT_BLINK_SUBSETS = frozenset(
+    {
+        "Relative_Reflectance",
+        "Relative_Depth",
+        "Functional_Correspondence",
+    }
+)
+
+_BLINK_ALIASES = {
+    "relative_reflectance": "Relative_Reflectance",
+    "relative_depth": "Relative_Depth",
+    "reletive_depth": "Relative_Depth",
+    "functional_correspondence": "Functional_Correspondence",
+    "rrf": "Relative_Reflectance",
+    "rdp": "Relative_Depth",
+    "fc": "Functional_Correspondence",
+}
+
+
+def _norm_blink_type(t: str) -> str:
+    t0 = (t or "").strip()
+    if not t0:
+        return ""
+    if t0 in DEFAULT_BLINK_SUBSETS:
+        return t0
+    tl = re.sub(r"\s+", "_", t0)
+    tl_lower = tl.lower()
+    if tl_lower in _BLINK_ALIASES:
+        return _BLINK_ALIASES[tl_lower]
+    if tl in _BLINK_ALIASES:
+        return _BLINK_ALIASES[tl]
+    return t0
+
+
+def _blink_cvbench_rows_for_metrics(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for item in rows:
+        r = dict(item)
+        gt = (item.get("ground_truth") or item.get("answer") or "").strip().upper()
+        r["ground_truth"] = gt
+        r["extracted_prediction"] = extract_answer((item.get("model_output") or "").strip())
+        out.append(r)
+    return out
+
+
+def eval_blink_subset(
+    results_path: str,
+    subsets: Optional[List[str]],
+    out_metrics: Optional[str],
+    mode: str = "blink_image_mc_qa",
+) -> Dict[str, Any]:
+    with open(results_path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    if not isinstance(raw, list):
+        raise ValueError("BLINK results must be a JSON list of rows.")
+    allow = DEFAULT_BLINK_SUBSETS if not subsets else frozenset(subsets)
+    filtered: List[Dict[str, Any]] = []
+    for item in raw:
+        t = _norm_blink_type(str(item.get("type", "") or item.get("sub_task", "") or item.get("l2-category", "")))
+        if t in allow:
+            filtered.append(item)
+    if not filtered:
+        seen = sorted({_norm_blink_type(str(x.get("type", "") or x.get("sub_task", ""))) for x in raw if isinstance(x, dict)})
+        raise RuntimeError(
+            f"No BLINK rows left after filtering to {allow}. "
+            f"Found type/sub_task values (normalized sample): {seen[:40]}{'...' if len(seen) > 40 else ''}. "
+            "Ensure rows include BLINK sub_task in \"type\" (or \"sub_task\")."
+        )
+    rows_for_m = _blink_cvbench_rows_for_metrics(filtered)
+    metrics = compute_metrics(rows_for_m)
+    metrics["blink_subsets_used"] = sorted(allow)
+    metrics["num_rows_filtered"] = len(filtered)
+    metrics["eval_mode"] = mode
+    metrics["mc_extract"] = "regex"
+    print(json.dumps(metrics["overall"], indent=2, ensure_ascii=False))
+    if out_metrics:
+        with open(out_metrics, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2, ensure_ascii=False)
+        print(f"[blink] wrote {out_metrics}")
+    return metrics
+
+
+def eval_cvbench(
+    results_path: str,
+    out_metrics: Optional[str],
+    mode: str = "cvbench_image_mc_qa",
+) -> Dict[str, Any]:
+    with open(results_path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    if not isinstance(raw, list):
+        raise ValueError("CV-Bench results must be a JSON list.")
+    rows_for_m = _blink_cvbench_rows_for_metrics(raw)
+    metrics = compute_metrics(rows_for_m)
+    metrics["eval_mode"] = mode
+    metrics["mc_extract"] = "regex"
+    if out_metrics:
+        with open(out_metrics, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2, ensure_ascii=False)
+        print(f"[cvbench] wrote {out_metrics}")
+    return metrics
+
+
 # ============ CLI ============
 
 def main():

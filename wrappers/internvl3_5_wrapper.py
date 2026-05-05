@@ -23,9 +23,6 @@ from utils.conversation import (
     INST_IT_IMAGE_SYSTEM_PROMPT,
     INST_IT_VIDEO_SYSTEM_PROMPT,
 )
-from utils.load_image import (
-    internvl_load_frames
-)
 from utils.overlay import overlay_visual_prompt
 from utils.tokenize import find_marker_pos
 
@@ -533,7 +530,20 @@ class InternVL3_5_Wrapper:
         return t.stack(pixel_values).cuda().to(t.bfloat16)
     
     def get_pixel_values_videos(self, video_path_or_video, max_num=12, input_size=448):
-        return internvl_load_frames(video_path_or_video)
+        """
+            https://huggingface.co/OpenGVLab/InternVL3-8B#inference-with-transformers
+        """
+        pixel_values_list, num_patches_list = [], []
+        transform = build_transform(input_size=input_size)
+        for frame_path in video_path_or_video:
+            img = Image.open(frame_path).convert('RGB')
+            img = dynamic_preprocess(img, image_size=input_size, use_thumbnail=True, max_num=max_num)
+            pixel_values = [transform(tile) for tile in img]
+            pixel_values = torch.stack(pixel_values).cuda().to(torch.bfloat16)
+            num_patches_list.append(pixel_values.shape[0])
+            pixel_values_list.append(pixel_values)
+        pixel_values = torch.cat(pixel_values_list)
+        return pixel_values, num_patches_list
     
     def build_transform(self, input_size):
         IMAGENET_MEAN = (0.485, 0.456, 0.406)

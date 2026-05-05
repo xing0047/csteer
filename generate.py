@@ -11,9 +11,9 @@ from transformers import (
 from PIL import Image
 from datasets import load_dataset, Dataset
 from tqdm import tqdm
-from utils.load_image import (
-    internvl_load_image,
-    internvl_load_frames,    
+from utils.internvl_utils import (
+    load_image as internvl_load_image,
+    load_frames as internvl_load_frames,
 )
 from utils.mpath_map import model_to_path_map
 from utils.conversation import (

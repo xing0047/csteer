@@ -1,12 +1,12 @@
 """
-为 Rewrite v.s. Rollout 生成 steering vectors（支持视频和图像）。
-通过对比改写后的rollout（正样本）和原始错误的rollout（负样本）的激活差异来生成向量。
+Generate steering vectors for Rewrite vs. Rollout (supports video and image).
+The vector is computed from activation differences between rewritten rollouts (positive) and the original incorrect rollouts (negative).
 
-支持的模型：internvl3, internvl3_5, qwen3vl
+Supported models: internvl3, internvl3_5, qwen3vl
 
-支持两种模式：
-1. image: 图像模式
-2. video: 视频模式
+Supports two modes:
+1. image: image mode
+2. video: video mode
 
 Example usage (video with internvl3_5):
 python generate_vector_rewrite.py \
@@ -159,20 +159,20 @@ class RewriteRolloutDataset(Dataset):
         self.media_root = os.path.abspath(media_root)
         self.data_type = data_type
         
-        # 创建索引
+        # Build indices
         judge_dict = {item['sample_id']: item for item in judge_results}
         rewritten_dict = {item['sample_id']: item for item in rewritten_rollouts}
         
-        # 获取前 n_samples 个 GT（sample_id），这些GT必须在rewritten_dict中存在
+        # Select first n_samples GTs (sample_id) that also exist in rewritten_dict
         sorted_sample_ids = sorted(judge_dict.keys())
-        # 先筛选出在rewritten_dict中存在的sample_id
+        # Filter to sample_ids that have rewrites
         available_sample_ids = [sid for sid in sorted_sample_ids if sid in rewritten_dict]
         if n_samples > 0:
             selected_sample_ids = available_sample_ids[:n_samples]
         else:
             selected_sample_ids = available_sample_ids
         
-        # 匹配并筛选数据：只处理前 n_samples 个 GT，但包含它们的所有符合条件的 rollout
+        # Match and filter: only keep the first n_samples GTs, but include all qualifying rollouts for those GTs.
         self.samples = []
         for sample_id in selected_sample_ids:
             
@@ -182,9 +182,9 @@ class RewriteRolloutDataset(Dataset):
             media_name = judge_item.get('media_name') or judge_item.get('image_name', '')
             ground_truth = judge_item['ground_truth']
             
-            # 根据数据类型获取媒体路径
+            # Resolve media path based on data type
             if data_type == "video":
-                # 从judge_results获取帧路径，或从原始数据获取
+                # Use frame paths from judge_results if available; otherwise fall back to raw dataset.
                 if 'frame_paths' in judge_item:
                     frame_paths = [os.path.join(self.media_root, p) for p in judge_item['frame_paths']]
                 elif sample_id < len(self.raw_data):
@@ -197,7 +197,7 @@ class RewriteRolloutDataset(Dataset):
                 media_path = frame_paths
                 instruction = "Please describe the whole video with IDs."
             else:
-                # 图像模式
+                # Image mode
                 if 'image_path' in judge_item and judge_item['image_path']:
                     image_path = os.path.join(self.media_root, judge_item['image_path'])
                 elif sample_id < len(self.raw_data):
@@ -215,7 +215,7 @@ class RewriteRolloutDataset(Dataset):
                 media_path = image_path
                 instruction = "Please describe the whole image with IDs."
             
-            # 匹配rollout pairs
+            # Match rollout pairs
             for rollout in judge_item['rollouts']:
                 rollout_id = rollout['rollout_id']
                 original_score = rollout['score']
@@ -224,7 +224,7 @@ class RewriteRolloutDataset(Dataset):
                 if original_score > score_threshold:
                     continue
                 
-                # 查找对应的rewritten rollout
+                # Find corresponding rewritten rollout
                 rewritten_rollout = None
                 for r_rollout in rewritten_item['rollouts']:
                     if r_rollout['rollout_id'] == rollout_id:
@@ -244,8 +244,7 @@ class RewriteRolloutDataset(Dataset):
                         'original_score': original_score
                     })
         
-        # 不再截断样本对列表，因为已经限制了GT的数量
-        # 前 n_samples 个 GT 下的所有符合条件的 rollout 都会被包含
+        # Do not truncate pair list: GT count is already limited, and all qualifying rollouts under those GTs are included.
         
         print(f"Loaded {len(self.samples)} matched rewrite-rollout pairs")
         print(f"Data type: {data_type}")
@@ -261,7 +260,7 @@ class RewriteRolloutDataset(Dataset):
 
 
 def _get_gpu_memory_info():
-    """获取当前GPU显存使用信息 (MB)"""
+    """Get current GPU memory usage info (MB)."""
     info = {}
     if t.cuda.is_available():
         for i in range(t.cuda.device_count()):
@@ -293,7 +292,7 @@ def generate_save_vectors(
     track_cost: bool = False,
 ):
     """
-    生成并保存 Rewrite vs Rollout 的 steering vectors
+    Generate and save steering vectors for Rewrite vs Rollout.
     """
     cost_data = {}
     t_total_start = time.time()
@@ -303,7 +302,7 @@ def generate_save_vectors(
     if not os.path.exists(vector_dir):
         os.makedirs(vector_dir)
     
-    # 加载模型wrapper
+    # Load model wrapper
     print(f"Loading wrapper model...")
     t_model_load_start = time.time()
     model = wrapper(
@@ -320,7 +319,7 @@ def generate_save_vectors(
         cost_data["model_load_time_s"] = round(t_model_load_end - t_model_load_start, 3)
         cost_data["gpu_after_model_load"] = _get_gpu_memory_info()
     
-    # 存储激活
+    # Store activations
     rewritten_rollout_activations = dict([(layer, []) for layer in layers])
     original_rollout_activations = dict([(layer, []) for layer in layers])
     
@@ -335,7 +334,7 @@ def generate_save_vectors(
         original_rollout = sample['original_rollout']
         rewritten_rollout = sample['rewritten_rollout']
         
-        # 检查媒体文件
+        # Check media exists
         if data_type == "video":
             valid_frames = [p for p in media_path if os.path.exists(p)]
             if len(valid_frames) == 0:
@@ -360,7 +359,7 @@ def generate_save_vectors(
         
         t_fwd_start = time.time()
         
-        # 1. 提取正样本激活（rewritten rollout）
+        # 1. Extract positive activations (rewritten rollout)
         model.reset_all()
         try:
             tokens_rewritten = model.get_tokens_for_compare(
@@ -390,7 +389,7 @@ def generate_save_vectors(
         model.reset_all()
         t.cuda.empty_cache()
         
-        # 2. 提取负样本激活（original rollout）
+        # 2. Extract negative activations (original rollout)
         model.reset_all()
         try:
             tokens_original = model.get_tokens_for_compare(
@@ -433,7 +432,7 @@ def generate_save_vectors(
     
     t_extract_end = time.time()
     
-    # 3. 计算向量
+    # 3. Compute vectors
     print("\nComputing steering vectors...")
     num_pairs = len(rewritten_rollout_activations[layers[0]])
     print(f"Total pairs: {num_pairs}")
@@ -461,7 +460,7 @@ def generate_save_vectors(
     
     t_total_end = time.time()
     
-    # 保存开销统计
+    # Save cost tracking
     if track_cost:
         cost_data["step"] = "generate_vector_rewrite"
         cost_data["model"] = f"{model_name}_{model_size}"
@@ -493,13 +492,13 @@ def generate_save_vectors(
         cost_json_path = os.path.join(vector_dir, "cost_generate_vector.json")
         with open(cost_json_path, 'w', encoding='utf-8') as f:
             json.dump(cost_data, f, ensure_ascii=False, indent=2)
-        print(f"\n开销统计已保存到: {cost_json_path}")
+        print(f"\nCost tracking saved to: {cost_json_path}")
 
 
 def main():
     args = parse_args()
     
-    # 加载数据
+    # Load data
     print("Loading judge results and rewritten rollouts...")
     with open(args.judge_results_json, 'r', encoding='utf-8') as f:
         judge_results = json.load(f)
@@ -509,7 +508,7 @@ def main():
     print(f"Loaded {len(judge_results)} judge results")
     print(f"Loaded {len(rewritten_rollouts)} rewritten rollouts")
     
-    # 创建数据集
+    # Create dataset
     dataset = RewriteRolloutDataset(
         judge_results=judge_results,
         rewritten_rollouts=rewritten_rollouts,
@@ -524,10 +523,10 @@ def main():
         print("Error: No matched samples found!")
         return
     
-    # 获取模型wrapper
+    # Get model wrapper
     wrapper = model_to_wrapper_map[args.model_name][args.model_size]
     
-    # 生成并保存向量
+    # Generate and save vectors
     generate_save_vectors(
         layers=args.layers,
         wrapper=wrapper,

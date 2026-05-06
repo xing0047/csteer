@@ -1,12 +1,12 @@
 """
-为视频生成rollout并打分
-通过vLLM生成多个rollout，然后使用judge模型判断分数，保存结果到JSON
+Generate rollouts for videos/images and score them.
+Generates multiple rollouts with vLLM, then uses a judge model to score them and saves results to JSON.
 
-支持的模型：internvl3, internvl3_5, qwen3vl
+Supported models: internvl3, internvl3_5, qwen3vl
 
-支持两种模式：
-1. image: 图像模式（原有功能）
-2. video: 视频模式（新增功能）
+Supports two modes:
+1. image: image mode (original)
+2. video: video mode (added)
 
 Example usage (video with internvl3_5):
 python generate_rollout.py \
@@ -149,7 +149,7 @@ def parse_args():
 
 
 class VideoDataset(Dataset):
-    """用于视频数据的数据集类"""
+    """Dataset for video samples."""
     def __init__(self, data_path, n_samples, media_root):
         with open(data_path, 'r', encoding='utf-8') as f:
             all_data = json.load(f)
@@ -161,24 +161,24 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.data[idx]
-        # 获取视频帧路径列表
+        # Get list of frame paths
         video_path = item['video_path']  # e.g., "videos_vpt/YoutubeVIS-2021/train/05e0b0f28f"
         frame_names = [frame_info['frame_name'] for frame_info in item['frame_level_caption']]
         
-        # 构建完整的帧路径列表
+        # Build absolute frame paths
         frame_paths = [os.path.join(self.media_root, video_path, frame_name) for frame_name in frame_names]
         
         caption_gt = item["video_level_caption"].strip()
         instruction = "Please describe the whole video with IDs."
         
-        # 提取视频ID作为名称
+        # Use video id as name
         video_name = os.path.basename(video_path)
         
         return frame_paths, instruction, caption_gt, video_name, idx
 
 
 class ImageDataset(Dataset):
-    """用于图像数据的数据集类"""
+    """Dataset for image samples."""
     def __init__(self, data_path, n_samples, media_root):
         with open(data_path, 'r', encoding='utf-8') as f:
             all_data = json.load(f)
@@ -190,7 +190,7 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.data[idx]
-        # 获取图像路径
+        # Get image path
         original_image_path = item['image_path']
         if original_image_path.startswith('images_vpt/'):
             relative_path = original_image_path[len('images_vpt/'):]
@@ -218,26 +218,26 @@ def generate_rollouts_for_video(
     max_tokens: int = 2048
 ) -> List[str]:
     """
-    使用vLLM为视频生成多个rollout
+    Generate multiple rollouts for a video using vLLM.
     
     Args:
-        vllm_llm: vLLM LLM实例
-        frame_paths: 视频帧路径列表
-        instruction: 指令
-        system_prompt: 系统提示词
-        num_rollouts: 生成rollout的数量
-        temperature: 采样温度
-        max_tokens: 最大生成token数
+        vllm_llm: vLLM LLM instance
+        frame_paths: List of video frame paths
+        instruction: Instruction/question
+        system_prompt: System prompt
+        num_rollouts: Number of rollouts to generate
+        temperature: Sampling temperature
+        max_tokens: Max generated tokens
     
     Returns:
-        List[str]: 生成的rollout列表
+        List[str]: Generated rollouts
     """
     full_prompt = f"{system_prompt}\n\n{instruction}"
     
-    # 构建多图像消息内容
+    # Build multi-image message content
     content = []
     
-    # 添加每个视频帧作为图像
+    # Add each video frame as an image
     for i, frame_path in enumerate(frame_paths):
         if not os.path.isabs(frame_path):
             frame_path = os.path.abspath(frame_path)
@@ -246,14 +246,14 @@ def generate_rollouts_for_video(
             print(f"Warning: Frame not found: {frame_path}")
             continue
         
-        # 使用 file:// URL 格式
+        # Use file:// URL
         frame_url = f"file://{frame_path}"
         content.append({
             "type": "image_url",
             "image_url": {"url": frame_url},
         })
     
-    # 添加文本提示
+    # Add text prompt
     content.append({
         "type": "text",
         "text": full_prompt,
@@ -311,7 +311,7 @@ def generate_rollouts_for_image(
     max_tokens: int = 1024
 ) -> List[str]:
     """
-    使用vLLM为图像生成多个rollout
+    Generate multiple rollouts for an image using vLLM.
     """
     full_prompt = f"{system_prompt}\n\n{instruction}"
     
@@ -369,7 +369,7 @@ def generate_rollouts_for_image(
 
 
 def extract_score(text: str) -> float:
-    """从judge模型的输出中提取分数（0-1之间）"""
+    """Extract a score (0-1) from judge model output."""
     for pat in [r"\b([01](?:\.\d+)?)\b", r"\b(0?\.\d+)\b"]:
         m = re.findall(pat, text)
         if m:
@@ -398,15 +398,15 @@ def judge_rollout_with_model(
     data_type: str = "video"
 ) -> float:
     """
-    使用judge模型判断rollout的分数
+    Score a rollout using the judge model.
     """
-    # 根据数据类型选择prompt模板
+    # Select prompt template based on data type
     if "gpt_eval_rollout" in prompt_template and data_type in prompt_template["gpt_eval_rollout"]:
         eval_prompt_template = prompt_template["gpt_eval_rollout"][data_type]
     elif "gpt_eval" in prompt_template and data_type in prompt_template["gpt_eval"]:
         eval_prompt_template = prompt_template["gpt_eval"][data_type]
     else:
-        # 默认使用image的模板
+        # Fall back to the image template
         eval_prompt_template = prompt_template.get("gpt_eval", {}).get("image", "")
     
     eval_input = f"question: {instruction}\nground truth answer for the question: {ground_truth}\nresponse from the tester: {rollout_text}"
@@ -430,7 +430,7 @@ def judge_rollout_with_model(
 
 
 def _get_gpu_memory_info():
-    """获取当前GPU显存使用信息 (MB)"""
+    """Get current GPU memory usage info (MB)."""
     info = {}
     if t.cuda.is_available():
         for i in range(t.cuda.device_count()):
@@ -455,35 +455,35 @@ def main():
     cost_data = {}
     t_total_start = time.time()
     
-    # 设置输出目录
+    # Output directory
     output_dir = os.path.join(args.output_root, args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
-    # 获取模型路径
+    # Resolve model path
     if args.vllm_model_path is None:
         vllm_model_path = model_to_path_map[args.model_name][args.model_size]
     else:
         vllm_model_path = args.vllm_model_path
     
-    # 确定允许的本地媒体路径
+    # Absolute media root path
     media_root_abs = os.path.abspath(args.media_root)
     
     print("=" * 50)
-    print(f"生成Rollout并打分")
+    print("Generating rollouts and scoring")
     print("=" * 50)
-    print(f"数据类型: {args.data_type}")
-    print(f"模型: {args.model_name}_{args.model_size}")
-    print(f"数据路径: {args.data_path}")
-    print(f"媒体根目录: {media_root_abs}")
-    print(f"样本数: {args.n_samples}")
-    print(f"Rollout数量: {args.num_rollouts}")
-    print(f"输出目录: {output_dir}")
+    print(f"Data type: {args.data_type}")
+    print(f"Model: {args.model_name}_{args.model_size}")
+    print(f"Data path: {args.data_path}")
+    print(f"Media root: {media_root_abs}")
+    print(f"Num samples: {args.n_samples}")
+    print(f"Num rollouts: {args.num_rollouts}")
+    print(f"Output dir: {output_dir}")
     if args.track_cost:
-        print(f"开销统计: 已启用")
+        print("Cost tracking: enabled")
     print("=" * 50)
     
-    # 加载vLLM模型
-    print(f"\n加载vLLM模型: {vllm_model_path}")
+    # Load vLLM model
+    print(f"\nLoading vLLM model: {vllm_model_path}")
     t_model_load_start = time.time()
     vllm_llm = LLM(
         model=vllm_model_path,
@@ -496,17 +496,17 @@ def main():
         limit_mm_per_prompt={"image": 32} if args.data_type == "video" else {"image": 1},
     )
     t_model_load_end = time.time()
-    print("vLLM模型加载完成")
+    print("vLLM model loaded")
     
     if args.track_cost:
         cost_data["model_load_time_s"] = round(t_model_load_end - t_model_load_start, 3)
         cost_data["gpu_after_model_load"] = _get_gpu_memory_info()
     
-    # 连接judge模型服务
+    # Connect to judge service
     judge_client = OpenAI(base_url=args.judge_base_url, api_key="EMPTY", timeout=600)
-    print(f"已连接Judge服务: {args.judge_base_url}")
+    print(f"Connected to judge service: {args.judge_base_url}")
     
-    # 创建数据集
+    # Create dataset
     if args.data_type == "video":
         dataset = VideoDataset(args.data_path, args.n_samples, media_root_abs)
         system_prompt = INST_IT_VIDEO_SYSTEM_PROMPT
@@ -514,12 +514,12 @@ def main():
         dataset = ImageDataset(args.data_path, args.n_samples, media_root_abs)
         system_prompt = INST_IT_IMAGE_SYSTEM_PROMPT
     
-    print(f"数据集大小: {len(dataset)}")
+    print(f"Dataset size: {len(dataset)}")
     
-    # 存储结果
+    # Store results
     all_results = []
     
-    # 开销统计变量
+    # Cost tracking variables
     rollout_gen_times = []
     judge_times = []
     total_rollout_tokens = 0
@@ -531,7 +531,7 @@ def main():
         if args.data_type == "video":
             frame_paths, instruction, caption_gt, media_name, sample_idx = dataset[idx]
             
-            # 检查帧是否存在
+            # Check frames exist
             valid_frames = [p for p in frame_paths if os.path.exists(p)]
             if len(valid_frames) == 0:
                 if args.verbose:
@@ -539,7 +539,7 @@ def main():
                 skipped_samples += 1
                 continue
             
-            # 生成rollouts
+            # Generate rollouts
             t_gen_start = time.time()
             rollouts = generate_rollouts_for_video(
                 vllm_llm=vllm_llm,
@@ -575,7 +575,7 @@ def main():
             for r in rollouts:
                 total_rollout_tokens += len(r.split()) if r else 0
         
-        # 打分
+        # Score
         rollout_details = []
         t_judge_start = time.time()
         for rollout_idx, rollout in enumerate(rollouts):
@@ -626,14 +626,14 @@ def main():
     
     t_inference_end = time.time()
     
-    # 保存JSON结果
+    # Save JSON results
     json_path = os.path.join(output_dir, "judge_results.json")
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     
-    print(f"\nJSON结果已保存到: {json_path}")
+    print(f"\nJSON results saved to: {json_path}")
     
-    # 保存CSV结果
+    # Save CSV results
     csv_path = os.path.join(output_dir, "judge_results.csv")
     with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['sample_idx', 'media_name'] + [f'rollout_{i}' for i in range(args.num_rollouts)] + ['num_incorrect']
@@ -652,19 +652,19 @@ def main():
             row['num_incorrect'] = result['num_incorrect']
             writer.writerow(row)
     
-    print(f"CSV结果已保存到: {csv_path}")
-    print(f"总样本数: {len(all_results)}")
+    print(f"CSV results saved to: {csv_path}")
+    print(f"Total samples: {len(all_results)}")
     
-    # 统计信息
+    # Summary stats
     total_rollouts = len(all_results) * args.num_rollouts
     total_incorrect = sum(r['num_incorrect'] for r in all_results)
-    print(f"总Rollout数: {total_rollouts}")
+    print(f"Total rollouts: {total_rollouts}")
     if total_rollouts > 0:
-        print(f"错误Rollout数: {total_incorrect} ({100*total_incorrect/total_rollouts:.1f}%)")
+        print(f"Incorrect rollouts: {total_incorrect} ({100*total_incorrect/total_rollouts:.1f}%)")
     
     t_total_end = time.time()
     
-    # 保存开销统计
+    # Save cost tracking
     if args.track_cost:
         cost_data["step"] = "generate_rollout"
         cost_data["model"] = f"{args.model_name}_{args.model_size}"
@@ -699,7 +699,7 @@ def main():
         cost_json_path = os.path.join(output_dir, "cost_generate_rollout.json")
         with open(cost_json_path, 'w', encoding='utf-8') as f:
             json.dump(cost_data, f, ensure_ascii=False, indent=2)
-        print(f"\n开销统计已保存到: {cost_json_path}")
+        print(f"\nCost tracking saved to: {cost_json_path}")
 
 
 if __name__ == "__main__":

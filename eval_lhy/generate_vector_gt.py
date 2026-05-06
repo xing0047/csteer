@@ -1,12 +1,12 @@
 """
-为 GT v.s. Rollout 生成 steering vectors（支持视频和图像）。
-通过对比官方的ground truth（正样本）和原始错误的rollout（负样本）的激活差异来生成向量。
+Generate steering vectors for GT vs. Rollout (supports video and image).
+The vector is computed from activation differences between the official ground truth (positive) and the original incorrect rollout (negative).
 
-支持的模型：internvl3, internvl3_5, qwen3vl
+Supported models: internvl3, internvl3_5, qwen3vl
 
-支持两种模式：
-1. image: 图像模式
-2. video: 视频模式
+Supports two modes:
+1. image: image mode
+2. video: video mode
 
 Example usage (video with internvl3_5):
 python generate_vector_gt.py \
@@ -145,17 +145,17 @@ class GTRolloutDataset(Dataset):
         self.media_root = os.path.abspath(media_root)
         self.data_type = data_type
         
-        # 创建索引
+        # Build indices
         judge_dict = {item['sample_id']: item for item in judge_results}
         
-        # 获取前 n_samples 个 GT（sample_id）
+        # Select first n_samples GTs (sample_id)
         sorted_sample_ids = sorted(judge_dict.keys())
         if n_samples > 0:
             selected_sample_ids = sorted_sample_ids[:n_samples]
         else:
             selected_sample_ids = sorted_sample_ids
         
-        # 匹配并筛选数据：只处理前 n_samples 个 GT，但包含它们的所有符合条件的 rollout
+        # Match and filter: only keep the first n_samples GTs, but include all qualifying rollouts for those GTs.
         self.samples = []
         for sample_id in selected_sample_ids:
             judge_item = judge_dict[sample_id]
@@ -163,9 +163,9 @@ class GTRolloutDataset(Dataset):
             media_name = judge_item.get('media_name') or judge_item.get('image_name', '')
             ground_truth = judge_item['ground_truth']
             
-            # 根据数据类型获取媒体路径
+            # Resolve media path based on data type
             if data_type == "video":
-                # 从judge_results获取帧路径，或从原始数据获取
+                # Use frame paths from judge_results if available; otherwise fall back to raw dataset.
                 if 'frame_paths' in judge_item:
                     frame_paths = [os.path.join(self.media_root, p) for p in judge_item['frame_paths']]
                 elif sample_id < len(self.raw_data):
@@ -178,7 +178,7 @@ class GTRolloutDataset(Dataset):
                 media_path = frame_paths
                 instruction = "Please describe the whole video with IDs."
             else:
-                # 图像模式
+                # Image mode
                 if 'image_path' in judge_item and judge_item['image_path']:
                     image_path = os.path.join(self.media_root, judge_item['image_path'])
                 elif sample_id < len(self.raw_data):
@@ -196,7 +196,7 @@ class GTRolloutDataset(Dataset):
                 media_path = image_path
                 instruction = "Please describe the whole image with IDs."
             
-            # 匹配rollout pairs
+            # Match rollout pairs
             for rollout in judge_item['rollouts']:
                 rollout_id = rollout['rollout_id']
                 original_score = rollout['score']
@@ -205,7 +205,7 @@ class GTRolloutDataset(Dataset):
                 if original_score > score_threshold:
                     continue
                 
-                # 直接使用GT和rollout，不需要rewritten_rollouts
+                # Use GT and rollout directly; rewritten_rollouts are not needed here.
                 self.samples.append({
                     'sample_id': sample_id,
                     'rollout_id': rollout_id,
@@ -217,8 +217,7 @@ class GTRolloutDataset(Dataset):
                     'original_score': original_score
                 })
         
-        # 不再截断样本对列表，因为已经限制了GT的数量
-        # 前 n_samples 个 GT 下的所有符合条件的 rollout 都会被包含
+        # Do not truncate pair list: GT count is already limited, and all qualifying rollouts under those GTs are included.
         
         print(f"Loaded {len(self.samples)} matched GT-rollout pairs")
         print(f"Data type: {data_type}")
@@ -245,15 +244,15 @@ def generate_save_vectors(
     verbose: bool = False,
 ):
     """
-    生成并保存 GT vs Rollout 的 steering vectors
-    使用官方的ground truth减去生成的rollout来计算向量
+    Generate and save steering vectors for GT vs Rollout.
+    The vector is computed as (GT activations - rollout activations).
     """
     behavior = REFER_VPT
     vector_dir = get_vector_dir(behavior, model_name, model_size, output_dir)
     if not os.path.exists(vector_dir):
         os.makedirs(vector_dir)
     
-    # 加载模型wrapper
+    # Load model wrapper
     print(f"Loading wrapper model...")
     model = wrapper(
         name=model_name,
@@ -264,10 +263,10 @@ def generate_save_vectors(
     model.set_save_internal_decodings(False)
     model.reset_all()
     
-    # 注意：get_tokens_for_compare 函数内部会自动添加 system prompt
-    # (INST_IT_IMAGE_SYSTEM_PROMPT 或 INST_IT_VIDEO_SYSTEM_PROMPT)
+    # Note: get_tokens_for_compare will automatically add the system prompt
+    # (INST_IT_IMAGE_SYSTEM_PROMPT or INST_IT_VIDEO_SYSTEM_PROMPT).
     
-    # 存储激活
+    # Store activations
     gt_activations = dict([(layer, []) for layer in layers])
     original_rollout_activations = dict([(layer, []) for layer in layers])
     
@@ -277,7 +276,7 @@ def generate_save_vectors(
         original_rollout = sample['original_rollout']
         ground_truth = sample['ground_truth']
         
-        # 检查媒体文件
+        # Check media exists
         if data_type == "video":
             valid_frames = [p for p in media_path if os.path.exists(p)]
             if len(valid_frames) == 0:
@@ -298,7 +297,7 @@ def generate_save_vectors(
             print(f"\n[{idx+1}/{len(dataset)}] Processing: {sample['media_name']}")
             print(f"  Original score: {sample['original_score']:.2f}")
         
-        # 1. 提取正样本激活（ground truth）
+        # 1. Extract positive activations (ground truth)
         model.reset_all()
         try:
             tokens_gt = model.get_tokens_for_compare(
@@ -327,7 +326,7 @@ def generate_save_vectors(
         model.reset_all()
         t.cuda.empty_cache()
         
-        # 2. 提取负样本激活（original rollout）
+        # 2. Extract negative activations (original rollout)
         model.reset_all()
         try:
             tokens_original = model.get_tokens_for_compare(
@@ -350,7 +349,7 @@ def generate_save_vectors(
         except Exception as e:
             if verbose:
                 print(f"Error processing original rollout: {e}")
-            # 移除对应的gt激活
+            # Remove corresponding GT activations to keep list lengths aligned.
             for layer in layers:
                 if len(gt_activations[layer]) > len(original_rollout_activations[layer]):
                     gt_activations[layer].pop()
@@ -364,7 +363,7 @@ def generate_save_vectors(
             gc.collect()
             t.cuda.empty_cache()
     
-    # 3. 计算向量：GT - Rollout
+    # 3. Compute vectors: GT - Rollout
     print("\nComputing steering vectors...")
     num_pairs = len(gt_activations[layers[0]])
     print(f"Total pairs: {num_pairs}")
@@ -377,7 +376,7 @@ def generate_save_vectors(
         all_gt = t.stack(gt_activations[layer], dim=0)
         all_original = t.stack(original_rollout_activations[layer], dim=0)
         
-        # 使用GT减去Rollout：vec = GT - Rollout
+        # vec = mean(GT - Rollout)
         vec = (all_gt - all_original).mean(dim=0)
         
         vec_path = get_vector_path(behavior, model_name, model_size, output_dir, layer)
@@ -393,14 +392,14 @@ def generate_save_vectors(
 def main():
     args = parse_args()
     
-    # 加载数据
+    # Load data
     print("Loading judge results...")
     with open(args.judge_results_json, 'r', encoding='utf-8') as f:
         judge_results = json.load(f)
     
     print(f"Loaded {len(judge_results)} judge results")
     
-    # 创建数据集
+    # Create dataset
     dataset = GTRolloutDataset(
         judge_results=judge_results,
         data_path=args.data_path,
@@ -414,10 +413,10 @@ def main():
         print("Error: No matched samples found!")
         return
     
-    # 获取模型wrapper
+    # Get model wrapper
     wrapper = model_to_wrapper_map[args.model_name][args.model_size]
     
-    # 生成并保存向量
+    # Generate and save vectors
     generate_save_vectors(
         layers=args.layers,
         wrapper=wrapper,

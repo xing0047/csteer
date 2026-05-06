@@ -1,6 +1,6 @@
 """
-生成 Refer VPT vs Raw 的对比数据对。
-对比有数字标注的图像（images_vpt）和原图（images_raw）的激活差异。
+Generate comparison pairs for Refer VPT vs Raw.
+Pairs compare annotated images (images_vpt) with the corresponding raw images (images_raw).
 
 Example usage:
 python generate_refer_vpt.py \
@@ -148,11 +148,11 @@ def main():
         ann_path = "../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json"
         data = json.load(open(ann_path))[:args.n_pairs]
         data_dict = {
-            'image_vpt': [],  # 有数字标注的图像路径
-            'image_raw': [],  # 原图路径
-            'caption_gt': [],  # 真实描述（用于后续可能的评估）
-            'instruction_vpt': [],  # 有标注图的指令（要求使用IDs）
-            'instruction_raw': [],  # 原图的指令（不要求使用IDs）
+            'image_vpt': [],  # annotated image path (with numeric IDs)
+            'image_raw': [],  # raw image path
+            'caption_gt': [],  # ground-truth caption (may be used for later evaluation)
+            'instruction_vpt': [],  # instruction for annotated image (requires IDs)
+            'instruction_raw': [],  # instruction for raw image (does not require IDs)
         }
     elif args.data == "inst_it_video":
         vid_root = "../DATA/Inst-It-Dataset"
@@ -168,18 +168,18 @@ def main():
     else:
         raise ValueError(f'No {args.data}')
     
-    # Generate Contrastive Pairs
-    # 有标注图：要求使用IDs描述
+    # Generate contrastive pairs
+    # Annotated image: requires describing with IDs
     question_vpt = "Please describe the whole image with IDs."
-    # 原图：不要求使用IDs（因为原图没有数字标注）
+    # Raw image: does not require IDs (raw images have no numeric annotations)
     question_raw = "Please describe the whole image."
     
     for item in tqdm(data, desc="Processing images"):
         if args.data == "inst_it_image":
-            # 获取原始图像路径（数据中的路径可能已经包含 images_vpt/ 前缀）
+            # Get original image path (may already include an images_vpt/ prefix)
             original_image_path = item['image_path']
             
-            # 从路径中提取相对路径（去掉 images_vpt/ 或 images_raw/ 前缀）
+            # Extract relative path (strip images_vpt/ or images_raw/ prefix)
             if original_image_path.startswith('images_vpt/'):
                 relative_path = original_image_path[len('images_vpt/'):]
             elif original_image_path.startswith('images_raw/'):
@@ -187,11 +187,11 @@ def main():
             else:
                 relative_path = original_image_path
             
-            # 构建有标注图和原图的完整路径
+            # Build full paths for annotated and raw images
             image_vpt_path = os.path.join(img_vpt_root, relative_path)
             image_raw_path = os.path.join(img_raw_root, relative_path)
             
-            # 检查文件是否存在
+            # Check files exist
             if not os.path.exists(image_vpt_path):
                 if args.verbose:
                     print(f"Warning: VPT image not found: {image_vpt_path}, skipping...")
@@ -214,7 +214,7 @@ def main():
                 print(f"[Raw]: {image_raw_path}")
                 print(f"[GT]: {caption_gt}")
         elif args.data == "inst_it_video":
-            # 视频处理逻辑（如果需要）
+            # Video handling (if needed)
             raise NotImplementedError("Video support for refer_vpt is not implemented yet")
         else:
             raise ValueError(f'No {args.data}')

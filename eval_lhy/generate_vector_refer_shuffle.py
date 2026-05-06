@@ -1,6 +1,6 @@
 """
-为 Exact Matching vs Prompt Shuffle 生成 steering vectors。
-通过对比正确匹配的图像（images_vpt）和打乱匹配的图像（images_shuffle）的激活差异来生成向量。
+Generate steering vectors for Exact Matching vs Prompt Shuffle.
+The vector is computed from activation differences between correctly-matched images (images_vpt) and shuffled mismatches (images_shuffle).
 
 Example usage:
 python generate_vector_refer_shuffle.py \
@@ -63,7 +63,7 @@ def parse_args():
 
 
 class ReferShuffleDataset(Dataset):
-    """用于 Exact Matching vs Prompt Shuffle 对比的数据集类"""
+    """Dataset for Exact Matching vs Prompt Shuffle comparisons."""
     def __init__(self, wrapper, data_path, model_name):
         self.data = load_from_disk(data_path)
         self.wrapper = wrapper
@@ -81,13 +81,13 @@ class ReferShuffleDataset(Dataset):
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
     def prompt_to_tokens(self, image_or_video_path, vision_type, instruction, system_prompt=None, verbose=False):
-        """将提示词转换为token，不包含模型输出（因为我们只提取激活，不生成）"""
+        """Convert prompts to tokens (no model output; we only extract activations)."""
         tokens = self.wrapper.get_tokens_for_compare(
             image_or_video_path, 
             vision_type, 
             instruction, 
-            model_output="",  # 空输出，因为我们只需要提取激活
-            system_prompt=system_prompt,  # 允许指定自定义 system prompt
+            model_output="",  # empty output: we only need activations
+            system_prompt=system_prompt,  # allow custom system prompt
             verbose=verbose
         )
         return t.tensor(tokens).unsqueeze(0)
@@ -98,21 +98,20 @@ class ReferShuffleDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         if self.data_name == "inst_it_image":
-            image_vpt_path = item["image_vpt"]  # 正确匹配的图像
-            image_shuffle_path = item["image_shuffle"]  # 打乱匹配的图像
-            instruction = item["instruction"]  # 指令文本（两个都用相同的指令）
+            image_vpt_path = item["image_vpt"]  # correctly matched image
+            image_shuffle_path = item["image_shuffle"]  # shuffled/mismatched image
+            instruction = item["instruction"]  # instruction text (same for both)
             
-            # 为VPT和Shuffle分别生成token
-            # 两个都使用包含ID规则的 system prompt（因为都有ID框）
-            # 两个都使用相同的 instruction（要求使用IDs）
+            # Tokenize VPT and Shuffle separately.
+            # Both use the same ID-rule system prompt (both have ID boxes) and same instruction (requires IDs).
             tokens_vpt = self.prompt_to_tokens(
                 image_vpt_path, "image", instruction, 
-                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # 有ID规则
+                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # with ID rules
                 verbose=False
             )
             tokens_shuffle = self.prompt_to_tokens(
                 image_shuffle_path, "image", instruction,
-                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # 有ID规则（两个都用相同的）
+                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # with ID rules (same for both)
                 verbose=False
             )
             return image_vpt_path, image_shuffle_path, "image", tokens_vpt, tokens_shuffle, instruction
@@ -137,15 +136,15 @@ def generate_save_vectors_for_behavior(
     output_dir: str,
     verbose: bool = False,
 ):
-    """生成并保存 Exact Matching vs Prompt Shuffle 的 steering vectors"""
+    """Generate and save steering vectors for Exact Matching vs Prompt Shuffle."""
     if not os.path.exists(get_vector_dir(behavior, model_name, model_size, output_dir)):
         os.makedirs(get_vector_dir(behavior, model_name, model_size, output_dir))
 
     model.set_save_internal_decodings(False)
     model.reset_all()
 
-    vpt_activations = dict([(layer, []) for layer in layers])  # 正确匹配图的激活
-    shuffle_activations = dict([(layer, []) for layer in layers])  # 打乱匹配图的激活
+    vpt_activations = dict([(layer, []) for layer in layers])  # activations for exact-match images
+    shuffle_activations = dict([(layer, []) for layer in layers])  # activations for shuffled/mismatched images
 
     dataset = ReferShuffleDataset(
         model,
@@ -157,27 +156,27 @@ def generate_save_vectors_for_behavior(
         tokens_vpt = tokens_vpt.to(model.device)
         tokens_shuffle = tokens_shuffle.to(model.device)
         
-        # 处理正确匹配图（VPT）- 使用相同的指令和system prompt
+        # Exact-match (VPT) branch: same instruction and system prompt
         model.reset_all()
         model.get_logits(vpt_path, vision_type, tokens_vpt)
         for layer in layers:
             vpt_act = model.get_last_activations(layer)
-            # 处理可能的3维激活 (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
+            # Handle possible 3D activations (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
             if len(vpt_act.shape) == 3:
-                vpt_act = vpt_act.squeeze(0)  # 移除batch维度
+                vpt_act = vpt_act.squeeze(0)  # remove batch dimension
             assert len(vpt_act.shape) == 2, f"Expected 2D activations, got shape {vpt_act.shape}"
-            # 取倒数第二个token的激活
+            # Use the second-to-last token activation
             vpt_act = vpt_act[-2, :].detach().cpu()
             vpt_activations[layer].append(vpt_act)
         
-        # 处理打乱匹配图（Shuffle）- 使用相同的指令和system prompt
+        # Shuffled/mismatched branch: same instruction and system prompt
         model.reset_all()
         model.get_logits(shuffle_path, vision_type, tokens_shuffle)
         for layer in layers:
             shuffle_act = model.get_last_activations(layer)
-            # 处理可能的3维激活 (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
+            # Handle possible 3D activations (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
             if len(shuffle_act.shape) == 3:
-                shuffle_act = shuffle_act.squeeze(0)  # 移除batch维度
+                shuffle_act = shuffle_act.squeeze(0)  # remove batch dimension
             assert len(shuffle_act.shape) == 2, f"Expected 2D activations, got shape {shuffle_act.shape}"
             shuffle_act = shuffle_act[-2, :].detach().cpu()
             shuffle_activations[layer].append(shuffle_act)
@@ -188,12 +187,11 @@ def generate_save_vectors_for_behavior(
             print(f"[Instruction]: {instruction}")
             print("-" * 80)
 
-    # 计算并保存向量
+    # Compute and save vectors
     for layer in layers:
         all_vpt_layer = t.stack(vpt_activations[layer])
         all_shuffle_layer = t.stack(shuffle_activations[layer])
-        # Steering vector = mean(VPT激活 - Shuffle激活)
-        # 这表示"正确匹配相对于打乱匹配"的激活方向
+        # Steering vector = mean(VPT - Shuffle), i.e. the direction of "exact match vs mismatch".
         vec = (all_vpt_layer - all_shuffle_layer).mean(dim=0)
         t.save(
             vec,
@@ -214,17 +212,17 @@ def generate_save_vectors(
     verbose: bool = False,
 ):
     """
-    生成并保存 Exact Matching vs Prompt Shuffle 的 steering vectors
+    Generate and save steering vectors for Exact Matching vs Prompt Shuffle.
     
     Args:
-        layers: 要生成向量的层列表
-        wrapper: 模型包装器
-        model_name: 模型名称
-        model_size: 模型大小
-        use_flash_attn: 是否使用flash attention
-        behavior_paths: 行为数据路径列表（对于refer_shuffle，通常只有一个）
-        output_dir: 输出目录
-        verbose: 是否输出详细信息
+        layers: Layers to generate vectors for
+        wrapper: Model wrapper
+        model_name: Model name
+        model_size: Model size
+        use_flash_attn: Whether to enable flash attention
+        behavior_paths: Behavior dataset paths (for refer_shuffle, usually just one)
+        output_dir: Output directory
+        verbose: Whether to print verbose logs
     """
     model = wrapper(
         name=model_name,
@@ -232,10 +230,10 @@ def generate_save_vectors(
         use_flash_attn=use_flash_attn
     )
     
-    # 对于 refer_shuffle，我们使用固定的 behavior 名称
+    # For refer_shuffle we use a fixed behavior name
     behavior = REFER_SHUFFLE
     
-    # 通常只有一个 behavior_path
+    # Usually there is only one behavior_path
     for behavior_path in behavior_paths:
         generate_save_vectors_for_behavior(
             layers, model_name, model_size, behavior, 

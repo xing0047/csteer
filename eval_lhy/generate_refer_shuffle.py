@@ -1,6 +1,6 @@
 """
-生成 Exact Matching vs Prompt Shuffle 的对比数据对。
-对比正确匹配的图像（images_vpt）和打乱匹配的图像（images_shuffle）的激活差异。
+Generate comparison pairs for Exact Matching vs Prompt Shuffle.
+Pairs compare correctly matched images (images_vpt) with shuffled mismatches (images_shuffle).
 
 Example usage:
 python generate_refer_shuffle.py \
@@ -78,14 +78,14 @@ def main():
         img_root = "../DATA/Inst-It-Dataset"
         img_vpt_root = "../DATA/Inst-It-Dataset/images_vpt"
         img_shuffle_root = "../DATA/Inst-It-Dataset/images_shuffle"
-        # 使用带mask的标注文件，因为shuffle图像是基于这个顺序的
+        # Use the annotated file; the shuffle images are aligned to this ordering.
         ann_path = "../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json"
         data = json.load(open(ann_path))[:args.n_pairs]
         data_dict = {
-            'image_vpt': [],  # 正确匹配的图像路径（images_vpt）
-            'image_shuffle': [],  # 打乱匹配的图像路径（images_shuffle）
-            'caption_gt': [],  # 真实描述（用于后续可能的评估）
-            'instruction': [],  # 指令文本（两个都用相同的指令，要求使用IDs）
+            'image_vpt': [],  # exact-match image path (images_vpt)
+            'image_shuffle': [],  # shuffled/mismatched image path (images_shuffle)
+            'caption_gt': [],  # ground-truth caption (may be used for later evaluation)
+            'instruction': [],  # instruction text (same for both, requires IDs)
         }
     elif args.data == "inst_it_video":
         vid_root = "../DATA/Inst-It-Dataset"
@@ -100,16 +100,16 @@ def main():
     else:
         raise ValueError(f'No {args.data}')
     
-    # Generate Contrastive Pairs
-    # 两个都使用相同的指令，要求使用IDs（因为都有ID框）
+    # Generate contrastive pairs
+    # Both use the same instruction requiring IDs (both have ID boxes).
     question = "Please describe the whole image with IDs."
     
     for item in tqdm(data, desc="Processing images"):
         if args.data == "inst_it_image":
-            # 获取原始图像路径（相对于 Inst-It-Dataset 根目录）
+            # Get original image path (relative to Inst-It-Dataset root)
             original_image_path = item['image_path']
             
-            # 从路径中提取相对路径（去掉 images_vpt/ 或 images_shuffle/ 前缀）
+            # Extract relative path (strip images_vpt/ or images_shuffle/ prefix)
             if original_image_path.startswith('images_vpt/'):
                 relative_path = original_image_path[len('images_vpt/'):]
             elif original_image_path.startswith('images_shuffle/'):
@@ -117,11 +117,11 @@ def main():
             else:
                 relative_path = original_image_path
             
-            # 构建正确匹配图和打乱匹配图的完整路径
+            # Build full paths for exact-match and shuffled images
             image_vpt_path = os.path.join(img_vpt_root, relative_path)
             image_shuffle_path = os.path.join(img_shuffle_root, relative_path)
             
-            # 检查文件是否存在
+            # Check files exist
             if not os.path.exists(image_vpt_path):
                 if args.verbose:
                     print(f"Warning: VPT image not found: {image_vpt_path}, skipping...")
@@ -143,7 +143,7 @@ def main():
                 print(f"[Shuffle (False Match)]: {image_shuffle_path}")
                 print(f"[GT]: {caption_gt}")
         elif args.data == "inst_it_video":
-            # 视频处理逻辑（如果需要）
+            # Video handling (if needed)
             raise NotImplementedError("Video support for refer_shuffle is not implemented yet")
         else:
             raise ValueError(f'No {args.data}')

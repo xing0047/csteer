@@ -1,6 +1,6 @@
 """
-为 Refer VPT vs Raw 生成 steering vectors。
-通过对比有数字标注的图像（images_vpt）和原图（images_raw）的激活差异来生成向量。
+Generate steering vectors for Refer VPT vs Raw.
+The vector is computed from activation differences between annotated images (images_vpt) and the corresponding raw images (images_raw).
 
 Example usage:
 python generate_vector_refer_vpt.py \
@@ -64,7 +64,7 @@ def parse_args():
 
 
 class ReferVPTDataset(Dataset):
-    """用于 Refer VPT vs Raw 对比的数据集类"""
+    """Dataset for Refer VPT vs Raw comparisons."""
     def __init__(self, wrapper, data_path, model_name):
         self.data = load_from_disk(data_path)
         self.wrapper = wrapper
@@ -82,13 +82,13 @@ class ReferVPTDataset(Dataset):
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
     def prompt_to_tokens(self, image_or_video_path, vision_type, instruction, system_prompt=None, verbose=False):
-        """将提示词转换为token，不包含模型输出（因为我们只提取激活，不生成）"""
+        """Convert prompts to tokens (no model output; we only extract activations)."""
         tokens = self.wrapper.get_tokens_for_compare(
             image_or_video_path, 
             vision_type, 
             instruction, 
-            model_output="",  # 空输出，因为我们只需要提取激活
-            system_prompt=system_prompt,  # 允许指定自定义 system prompt
+            model_output="",  # empty output: we only need activations
+            system_prompt=system_prompt,  # allow custom system prompt
             verbose=verbose
         )
         return t.tensor(tokens).unsqueeze(0)
@@ -99,22 +99,22 @@ class ReferVPTDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         if self.data_name == "inst_it_image":
-            image_vpt_path = item["image_vpt"]  # 有数字标注的图像
-            image_raw_path = item["image_raw"]  # 原图
-            instruction_vpt = item["instruction_vpt"]  # 有标注图的指令（要求使用IDs）
-            instruction_raw = item["instruction_raw"]  # 原图的指令（不要求使用IDs）
+            image_vpt_path = item["image_vpt"]  # annotated image with numeric IDs
+            image_raw_path = item["image_raw"]  # raw image
+            instruction_vpt = item["instruction_vpt"]  # instruction for annotated image (requires IDs)
+            instruction_raw = item["instruction_raw"]  # instruction for raw image (does not require IDs)
             
-            # 为VPT和Raw分别生成token
-            # VPT: 使用包含ID规则的 system prompt
-            # Raw: 使用不包含ID规则的 system prompt
+            # Tokenize VPT and Raw separately:
+            # - VPT: system prompt includes ID rules
+            # - Raw: system prompt without ID rules
             tokens_vpt = self.prompt_to_tokens(
                 image_vpt_path, "image", instruction_vpt, 
-                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # 有ID规则
+                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT,  # with ID rules
                 verbose=False
             )
             tokens_raw = self.prompt_to_tokens(
                 image_raw_path, "image", instruction_raw,
-                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT_NO_ID,  # 无ID规则
+                system_prompt=INST_IT_IMAGE_SYSTEM_PROMPT_NO_ID,  # without ID rules
                 verbose=False
             )
             return image_vpt_path, image_raw_path, "image", tokens_vpt, tokens_raw, instruction_vpt, instruction_raw
@@ -140,15 +140,15 @@ def generate_save_vectors_for_behavior(
     output_dir: str,
     verbose: bool = False,
 ):
-    """生成并保存 Refer VPT vs Raw 的 steering vectors"""
+    """Generate and save steering vectors for Refer VPT vs Raw."""
     if not os.path.exists(get_vector_dir(behavior, model_name, model_size, output_dir)):
         os.makedirs(get_vector_dir(behavior, model_name, model_size, output_dir))
 
     model.set_save_internal_decodings(False)
     model.reset_all()
 
-    vpt_activations = dict([(layer, []) for layer in layers])  # 有标注图的激活
-    raw_activations = dict([(layer, []) for layer in layers])  # 原图的激活
+    vpt_activations = dict([(layer, []) for layer in layers])  # activations for annotated (VPT) images
+    raw_activations = dict([(layer, []) for layer in layers])  # activations for raw images
 
     dataset = ReferVPTDataset(
         model,
@@ -160,27 +160,27 @@ def generate_save_vectors_for_behavior(
         tokens_vpt = tokens_vpt.to(model.device)
         tokens_raw = tokens_raw.to(model.device)
         
-        # 处理有标注图（VPT）- 使用要求IDs的指令
+        # Annotated (VPT) branch: instruction requires IDs
         model.reset_all()
         model.get_logits(vpt_path, vision_type, tokens_vpt)
         for layer in layers:
             vpt_act = model.get_last_activations(layer)
-            # 处理可能的3维激活 (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
+            # Handle possible 3D activations (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
             if len(vpt_act.shape) == 3:
-                vpt_act = vpt_act.squeeze(0)  # 移除batch维度
+                vpt_act = vpt_act.squeeze(0)  # remove batch dimension
             assert len(vpt_act.shape) == 2, f"Expected 2D activations, got shape {vpt_act.shape}"
-            # 取倒数第二个token的激活（通常是答案生成前的关键位置）
+            # Use the second-to-last token (often right before answer generation).
             vpt_act = vpt_act[-2, :].detach().cpu()
             vpt_activations[layer].append(vpt_act)
         
-        # 处理原图（Raw）- 使用不要求IDs的指令
+        # Raw branch: instruction does not require IDs
         model.reset_all()
         model.get_logits(raw_path, vision_type, tokens_raw)
         for layer in layers:
             raw_act = model.get_last_activations(layer)
-            # 处理可能的3维激活 (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
+            # Handle possible 3D activations (batch, seq_len, hidden_dim) -> (seq_len, hidden_dim)
             if len(raw_act.shape) == 3:
-                raw_act = raw_act.squeeze(0)  # 移除batch维度
+                raw_act = raw_act.squeeze(0)  # remove batch dimension
             assert len(raw_act.shape) == 2, f"Expected 2D activations, got shape {raw_act.shape}"
             raw_act = raw_act[-2, :].detach().cpu()
             raw_activations[layer].append(raw_act)
@@ -192,12 +192,11 @@ def generate_save_vectors_for_behavior(
             print(f"[Instruction Raw]: {instruction_raw}")
             print("-" * 80)
 
-    # 计算并保存向量
+    # Compute and save vectors
     for layer in layers:
         all_vpt_layer = t.stack(vpt_activations[layer])
         all_raw_layer = t.stack(raw_activations[layer])
-        # Steering vector = mean(VPT激活 - Raw激活)
-        # 这表示"有标注图相对于原图"的激活方向
+        # Steering vector = mean(VPT - Raw), i.e. the direction of "annotated vs raw".
         vec = (all_vpt_layer - all_raw_layer).mean(dim=0)
         t.save(
             vec,
@@ -218,17 +217,17 @@ def generate_save_vectors(
     verbose: bool = False,
 ):
     """
-    生成并保存 Refer VPT vs Raw 的 steering vectors
+    Generate and save steering vectors for Refer VPT vs Raw.
     
     Args:
-        layers: 要生成向量的层列表
-        wrapper: 模型包装器
-        model_name: 模型名称
-        model_size: 模型大小
-        use_flash_attn: 是否使用flash attention
-        behavior_paths: 行为数据路径列表（对于refer_vpt，通常只有一个）
-        output_dir: 输出目录
-        verbose: 是否输出详细信息
+        layers: Layers to generate vectors for
+        wrapper: Model wrapper
+        model_name: Model name
+        model_size: Model size
+        use_flash_attn: Whether to enable flash attention
+        behavior_paths: Behavior dataset paths (for refer_vpt, usually just one)
+        output_dir: Output directory
+        verbose: Whether to print verbose logs
     """
     model = wrapper(
         name=model_name,
@@ -236,10 +235,10 @@ def generate_save_vectors(
         use_flash_attn=use_flash_attn
     )
     
-    # 对于 refer_vpt，我们使用固定的 behavior 名称
+    # For refer_vpt we use a fixed behavior name
     behavior = REFER_VPT
     
-    # 通常只有一个 behavior_path
+    # Usually there is only one behavior_path
     for behavior_path in behavior_paths:
         generate_save_vectors_for_behavior(
             layers, model_name, model_size, behavior, 

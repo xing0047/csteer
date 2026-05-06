@@ -30,9 +30,7 @@ python rewrite_rollouts.py \
 
 import json
 import argparse
-import time
 import os
-import psutil
 from typing import List, Dict, Any
 from openai import OpenAI
 from tqdm import tqdm
@@ -74,10 +72,6 @@ def parse_args():
     parser.add_argument(
         "--verbose", action='store_true',
         help="Enable verbose output"
-    )
-    parser.add_argument(
-        "--track_cost", action='store_true',
-        help="Track and save cost metrics (time, API calls, etc.) to a JSON file"
     )
     return parser.parse_args()
 
@@ -168,8 +162,7 @@ def rewrite_rollouts(
     instruction: str,
     data_type: str = "image",
     score_threshold: float = 0.6,
-    verbose: bool = False,
-    track_cost: bool = False
+    verbose: bool = False
 ):
     """
     Load judge_results.json, rewrite low-score rollouts, and save results.
@@ -183,11 +176,7 @@ def rewrite_rollouts(
         data_type: Data type ("image" or "video")
         score_threshold: Score threshold; rollouts with score <= threshold will be rewritten
         verbose: Whether to print verbose logs
-        track_cost: Whether to track and save cost metrics
     """
-    cost_data = {}
-    t_total_start = time.time()
-    
     # Load input JSON
     print(f"Loading judge results from: {input_json_path}")
     with open(input_json_path, 'r', encoding='utf-8') as f:
@@ -201,23 +190,14 @@ def rewrite_rollouts(
     print(f"Using rewrite model: {judge_model_name}")
     print(f"Data type: {data_type}")
     print(f"Score threshold: {score_threshold} (rollouts with score <= {score_threshold} will be rewritten)")
-    if track_cost:
-        print("Cost tracking: enabled")
     
     # Stats
     total_rollouts = 0
     low_score_rollouts = 0
     rewritten_rollouts = 0
     
-    # Cost tracking variables
-    rewrite_times = []
-    api_call_count = 0
-    approx_input_tokens = 0
-    approx_output_tokens = 0
-    
     # Process each sample
     rewritten_results = []
-    t_rewrite_start = time.time()
     for sample_data in tqdm(judge_results, desc="Rewriting rollouts"):
         sample_id = sample_data['sample_id']
         media_name = sample_data.get('media_name') or sample_data.get('image_name', '')
@@ -241,7 +221,6 @@ def rewrite_rollouts(
                 if verbose:
                     print(f"  Rewriting rollout {rollout_id} (score: {score:.2f})")
                 
-                t_api_start = time.time()
                 rewritten_text = rewrite_rollout_with_model(
                     rewrite_client=rewrite_client,
                     rewrite_model_name=judge_model_name,
@@ -251,13 +230,6 @@ def rewrite_rollouts(
                     data_type=data_type,
                     verbose=verbose
                 )
-                t_api_end = time.time()
-                
-                if track_cost:
-                    rewrite_times.append(t_api_end - t_api_start)
-                    api_call_count += 1
-                    approx_input_tokens += len(rollout_text.split()) + len(ground_truth.split()) + len(instruction.split())
-                    approx_output_tokens += len(rewritten_text.split())
                 
                 rewritten_rollouts_list.append({
                     'rollout_id': rollout_id,
@@ -276,7 +248,6 @@ def rewrite_rollouts(
             'ground_truth': ground_truth,
             'rollouts': rewritten_rollouts_list
         })
-    t_rewrite_end = time.time()
     
     # Save results to JSON
     print(f"\nSaving rewritten results to: {output_json_path}")
@@ -295,44 +266,6 @@ def rewrite_rollouts(
     print(f"Successfully rewritten: {rewritten_rollouts}")
     print(f"Results saved to: {output_json_path}")
     
-    t_total_end = time.time()
-    
-    # Save cost tracking
-    if track_cost:
-        cost_data["step"] = "rewrite_rollouts"
-        cost_data["data_type"] = data_type
-        cost_data["rewrite_model"] = judge_model_name
-        cost_data["score_threshold"] = score_threshold
-        cost_data["total_samples"] = len(judge_results)
-        cost_data["total_rollouts"] = total_rollouts
-        cost_data["low_score_rollouts"] = low_score_rollouts
-        cost_data["rewritten_count"] = rewritten_rollouts
-        cost_data["total_wall_time_s"] = round(t_total_end - t_total_start, 3)
-        cost_data["rewrite_processing_time_s"] = round(t_rewrite_end - t_rewrite_start, 3)
-        cost_data["api_calls"] = {
-            "count": api_call_count,
-            "total_time_s": round(sum(rewrite_times), 3) if rewrite_times else 0,
-            "avg_time_per_call_s": round(sum(rewrite_times) / len(rewrite_times), 3) if rewrite_times else 0,
-            "min_time_s": round(min(rewrite_times), 3) if rewrite_times else 0,
-            "max_time_s": round(max(rewrite_times), 3) if rewrite_times else 0,
-        }
-        cost_data["approx_input_tokens"] = approx_input_tokens
-        cost_data["approx_output_tokens"] = approx_output_tokens
-        cost_data["system"] = {
-            "cpu_count": psutil.cpu_count(),
-            "ram_total_GB": round(psutil.virtual_memory().total / 1024**3, 2),
-            "ram_used_GB": round(psutil.virtual_memory().used / 1024**3, 2),
-        }
-        
-        cost_json_path = os.path.join(
-            output_dir if output_dir else ".",
-            "cost_rewrite_rollouts.json"
-        )
-        with open(cost_json_path, 'w', encoding='utf-8') as f:
-            json.dump(cost_data, f, ensure_ascii=False, indent=2)
-        print(f"\nCost tracking saved to: {cost_json_path}")
-
-
 if __name__ == "__main__":
     args = parse_args()
     
@@ -353,6 +286,5 @@ if __name__ == "__main__":
         instruction=instruction,
         data_type=args.data_type,
         score_threshold=args.score_threshold,
-        verbose=args.verbose,
-        track_cost=args.track_cost
+        verbose=args.verbose
     )

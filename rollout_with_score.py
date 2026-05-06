@@ -9,12 +9,12 @@ Supports two modes:
 2. video: video mode (added)
 
 Example usage (video with internvl3_5):
-python generate_rollout.py \
+python rollout_with_score.py \
     --model_name internvl3_5 \
     --model_size 8b \
     --data_type video \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --num_rollouts 8 \
     --rollout_temperature 0.6 \
@@ -24,12 +24,12 @@ python generate_rollout.py \
     --verbose
 
 Example usage (video with qwen3vl):
-python generate_rollout.py \
+python rollout_with_score.py \
     --model_name qwen3vl \
     --model_size 8b \
     --data_type video \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --num_rollouts 8 \
     --rollout_temperature 0.6 \
@@ -39,12 +39,12 @@ python generate_rollout.py \
     --verbose
 
 Example usage (image):
-python generate_rollout.py \
+python rollout_with_score.py \
     --model_name internvl3_5 \
     --model_size 8b \
     --data_type image \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_image_51k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --num_rollouts 8 \
     --output_dir image_rollout_exp \
@@ -70,8 +70,6 @@ from utils.conversation import (
 from utils.prompts import prompt_template
 import re
 import csv
-import time
-import psutil
 
 
 def parse_args():
@@ -140,10 +138,6 @@ def parse_args():
     )
     parser.add_argument(
         '--verbose', action='store_true', help="enable verbose outputs"
-    )
-    parser.add_argument(
-        '--track_cost', action='store_true',
-        help="Track and save cost metrics (time, tokens, etc.) to a JSON file"
     )
     return parser.parse_args()
 
@@ -429,31 +423,8 @@ def judge_rollout_with_model(
         return 0.0
 
 
-def _get_gpu_memory_info():
-    """Get current GPU memory usage info (MB)."""
-    info = {}
-    if t.cuda.is_available():
-        for i in range(t.cuda.device_count()):
-            allocated = t.cuda.memory_allocated(i) / 1024**2
-            reserved = t.cuda.memory_reserved(i) / 1024**2
-            props = t.cuda.get_device_properties(i)
-            total_bytes = getattr(props, "total_memory", None)
-            if total_bytes is None:
-                total_bytes = getattr(props, "total_mem", 0)
-            total = total_bytes / 1024**2
-            info[f"gpu_{i}"] = {
-                "allocated_MB": round(allocated, 2),
-                "reserved_MB": round(reserved, 2),
-                "total_MB": round(total, 2),
-            }
-    return info
-
-
 def main():
     args = parse_args()
-    
-    cost_data = {}
-    t_total_start = time.time()
     
     # Output directory
     output_dir = os.path.join(args.output_root, args.output_dir)
@@ -478,13 +449,10 @@ def main():
     print(f"Num samples: {args.n_samples}")
     print(f"Num rollouts: {args.num_rollouts}")
     print(f"Output dir: {output_dir}")
-    if args.track_cost:
-        print("Cost tracking: enabled")
     print("=" * 50)
     
     # Load vLLM model
     print(f"\nLoading vLLM model: {vllm_model_path}")
-    t_model_load_start = time.time()
     vllm_llm = LLM(
         model=vllm_model_path,
         tensor_parallel_size=args.vllm_tensor_parallel_size,
@@ -495,12 +463,7 @@ def main():
         allowed_local_media_path="/",
         limit_mm_per_prompt={"image": 32} if args.data_type == "video" else {"image": 1},
     )
-    t_model_load_end = time.time()
     print("vLLM model loaded")
-    
-    if args.track_cost:
-        cost_data["model_load_time_s"] = round(t_model_load_end - t_model_load_start, 3)
-        cost_data["gpu_after_model_load"] = _get_gpu_memory_info()
     
     # Connect to judge service
     judge_client = OpenAI(base_url=args.judge_base_url, api_key="EMPTY", timeout=600)
@@ -519,13 +482,7 @@ def main():
     # Store results
     all_results = []
     
-    # Cost tracking variables
-    rollout_gen_times = []
-    judge_times = []
-    total_rollout_tokens = 0
     skipped_samples = 0
-    
-    t_inference_start = time.time()
     
     for idx in tqdm(range(len(dataset)), desc="Processing samples"):
         if args.data_type == "video":
@@ -540,7 +497,6 @@ def main():
                 continue
             
             # Generate rollouts
-            t_gen_start = time.time()
             rollouts = generate_rollouts_for_video(
                 vllm_llm=vllm_llm,
                 frame_paths=valid_frames,
@@ -549,7 +505,6 @@ def main():
                 num_rollouts=args.num_rollouts,
                 temperature=args.rollout_temperature,
             )
-            t_gen_end = time.time()
         else:
             image_path, instruction, caption_gt, media_name, sample_idx = dataset[idx]
             
@@ -559,7 +514,6 @@ def main():
                 skipped_samples += 1
                 continue
             
-            t_gen_start = time.time()
             rollouts = generate_rollouts_for_image(
                 vllm_llm=vllm_llm,
                 image_path=image_path,
@@ -568,16 +522,9 @@ def main():
                 num_rollouts=args.num_rollouts,
                 temperature=args.rollout_temperature,
             )
-            t_gen_end = time.time()
-        
-        if args.track_cost:
-            rollout_gen_times.append(t_gen_end - t_gen_start)
-            for r in rollouts:
-                total_rollout_tokens += len(r.split()) if r else 0
         
         # Score
         rollout_details = []
-        t_judge_start = time.time()
         for rollout_idx, rollout in enumerate(rollouts):
             if not rollout:
                 score = 0.0
@@ -596,10 +543,6 @@ def main():
                 'rollout_text': rollout,
                 'score': score
             })
-        t_judge_end = time.time()
-        
-        if args.track_cost:
-            judge_times.append(t_judge_end - t_judge_start)
         
         num_incorrect = sum(1 for r in rollout_details if r['score'] <= 0.6)
         
@@ -623,8 +566,6 @@ def main():
             print(f"\n[{idx+1}/{len(dataset)}] {media_name}")
             print(f"  Scores: {[f'{s:.2f}' for s in scores]}")
             print(f"  Incorrect: {num_incorrect}/{args.num_rollouts}")
-    
-    t_inference_end = time.time()
     
     # Save JSON results
     json_path = os.path.join(output_dir, "judge_results.json")
@@ -662,45 +603,5 @@ def main():
     if total_rollouts > 0:
         print(f"Incorrect rollouts: {total_incorrect} ({100*total_incorrect/total_rollouts:.1f}%)")
     
-    t_total_end = time.time()
-    
-    # Save cost tracking
-    if args.track_cost:
-        cost_data["step"] = "generate_rollout"
-        cost_data["model"] = f"{args.model_name}_{args.model_size}"
-        cost_data["data_type"] = args.data_type
-        cost_data["n_samples_requested"] = args.n_samples
-        cost_data["n_samples_processed"] = len(all_results)
-        cost_data["n_samples_skipped"] = skipped_samples
-        cost_data["num_rollouts_per_sample"] = args.num_rollouts
-        cost_data["total_rollouts_generated"] = total_rollouts
-        cost_data["total_wall_time_s"] = round(t_total_end - t_total_start, 3)
-        cost_data["inference_time_s"] = round(t_inference_end - t_inference_start, 3)
-        cost_data["rollout_generation"] = {
-            "total_time_s": round(sum(rollout_gen_times), 3),
-            "avg_time_per_sample_s": round(sum(rollout_gen_times) / len(rollout_gen_times), 3) if rollout_gen_times else 0,
-            "min_time_s": round(min(rollout_gen_times), 3) if rollout_gen_times else 0,
-            "max_time_s": round(max(rollout_gen_times), 3) if rollout_gen_times else 0,
-        }
-        cost_data["judge_scoring"] = {
-            "total_time_s": round(sum(judge_times), 3),
-            "avg_time_per_sample_s": round(sum(judge_times) / len(judge_times), 3) if judge_times else 0,
-            "min_time_s": round(min(judge_times), 3) if judge_times else 0,
-            "max_time_s": round(max(judge_times), 3) if judge_times else 0,
-        }
-        cost_data["approx_rollout_tokens_generated"] = total_rollout_tokens
-        cost_data["gpu_after_inference"] = _get_gpu_memory_info()
-        cost_data["system"] = {
-            "cpu_count": psutil.cpu_count(),
-            "ram_total_GB": round(psutil.virtual_memory().total / 1024**3, 2),
-            "ram_used_GB": round(psutil.virtual_memory().used / 1024**3, 2),
-        }
-        
-        cost_json_path = os.path.join(output_dir, "cost_generate_rollout.json")
-        with open(cost_json_path, 'w', encoding='utf-8') as f:
-            json.dump(cost_data, f, ensure_ascii=False, indent=2)
-        print(f"\nCost tracking saved to: {cost_json_path}")
-
-
 if __name__ == "__main__":
     main()

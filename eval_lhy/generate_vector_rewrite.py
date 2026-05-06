@@ -16,8 +16,8 @@ python generate_vector_rewrite.py \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
     --rewritten_rollouts_json ./ROLLOUT_RESULTS/video_rollout_exp/rewritten_rollouts.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
     --output_dir refer_rewrite_video_exp \
@@ -32,8 +32,8 @@ python generate_vector_rewrite.py \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
     --rewritten_rollouts_json ./ROLLOUT_RESULTS/video_rollout_exp/rewritten_rollouts.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
     --output_dir refer_rewrite_video_exp \
@@ -48,8 +48,8 @@ python generate_vector_rewrite.py \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/image_rollout_exp/judge_results.json \
     --rewritten_rollouts_json ./ROLLOUT_RESULTS/image_rollout_exp/rewritten_rollouts.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_image_51k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --output_dir refer_rewrite_image_exp \
     --use_flash_attn \
@@ -62,8 +62,6 @@ from tqdm import tqdm
 import os
 import argparse
 import json
-import time
-import psutil
 from typing import List, Optional, Tuple
 from PIL import Image
 from behaviors import (
@@ -130,10 +128,6 @@ def parse_args():
     parser.add_argument(
         "--output_dir", type=str, required=True,
         help="Output directory name for saving vectors"
-    )
-    parser.add_argument(
-        '--track_cost', action='store_true',
-        help="Track and save cost metrics (time, forward passes, GPU memory, etc.) to a JSON file"
     )
     return parser.parse_args()
 
@@ -259,26 +253,6 @@ class RewriteRolloutDataset(Dataset):
         return self.samples[idx]
 
 
-def _get_gpu_memory_info():
-    """Get current GPU memory usage info (MB)."""
-    info = {}
-    if t.cuda.is_available():
-        for i in range(t.cuda.device_count()):
-            allocated = t.cuda.memory_allocated(i) / 1024**2
-            reserved = t.cuda.memory_reserved(i) / 1024**2
-            props = t.cuda.get_device_properties(i)
-            total_bytes = getattr(props, "total_memory", None)
-            if total_bytes is None:
-                total_bytes = getattr(props, "total_mem", 0)
-            total = total_bytes / 1024**2
-            info[f"gpu_{i}"] = {
-                "allocated_MB": round(allocated, 2),
-                "reserved_MB": round(reserved, 2),
-                "total_MB": round(total, 2),
-            }
-    return info
-
-
 def generate_save_vectors(
     layers: List[int],
     wrapper,
@@ -289,14 +263,10 @@ def generate_save_vectors(
     data_type: str,
     output_dir: str,
     verbose: bool = False,
-    track_cost: bool = False,
 ):
     """
     Generate and save steering vectors for Rewrite vs Rollout.
     """
-    cost_data = {}
-    t_total_start = time.time()
-    
     behavior = REFER_VPT
     vector_dir = get_vector_dir(behavior, model_name, model_size, output_dir)
     if not os.path.exists(vector_dir):
@@ -304,30 +274,22 @@ def generate_save_vectors(
     
     # Load model wrapper
     print(f"Loading wrapper model...")
-    t_model_load_start = time.time()
     model = wrapper(
         name=model_name,
         size=model_size,
         use_flash_attn=use_flash_attn
     )
-    t_model_load_end = time.time()
     
     model.set_save_internal_decodings(False)
     model.reset_all()
-    
-    if track_cost:
-        cost_data["model_load_time_s"] = round(t_model_load_end - t_model_load_start, 3)
-        cost_data["gpu_after_model_load"] = _get_gpu_memory_info()
     
     # Store activations
     rewritten_rollout_activations = dict([(layer, []) for layer in layers])
     original_rollout_activations = dict([(layer, []) for layer in layers])
     
-    forward_pass_times = []
     skipped_samples = 0
     error_samples = 0
-    
-    t_extract_start = time.time()
+
     for idx, sample in enumerate(tqdm(dataset, desc="Processing samples")):
         media_path = sample['media_path']
         instruction = sample['instruction']
@@ -356,8 +318,6 @@ def generate_save_vectors(
         if verbose and idx % 100 == 0:
             print(f"\n[{idx+1}/{len(dataset)}] Processing: {sample['media_name']}")
             print(f"  Original score: {sample['original_score']:.2f}")
-        
-        t_fwd_start = time.time()
         
         # 1. Extract positive activations (rewritten rollout)
         model.reset_all()
@@ -418,10 +378,6 @@ def generate_save_vectors(
             error_samples += 1
             continue
         
-        t_fwd_end = time.time()
-        if track_cost:
-            forward_pass_times.append(t_fwd_end - t_fwd_start)
-        
         del tokens_original
         model.reset_all()
         t.cuda.empty_cache()
@@ -429,8 +385,6 @@ def generate_save_vectors(
         if (idx + 1) % 50 == 0:
             gc.collect()
             t.cuda.empty_cache()
-    
-    t_extract_end = time.time()
     
     # 3. Compute vectors
     print("\nComputing steering vectors...")
@@ -441,7 +395,6 @@ def generate_save_vectors(
         print("Error: No valid pairs found!")
         return
     
-    t_compute_start = time.time()
     for layer in tqdm(layers, desc="Computing vectors"):
         all_rewritten = t.stack(rewritten_rollout_activations[layer], dim=0)
         all_original = t.stack(original_rollout_activations[layer], dim=0)
@@ -453,46 +406,9 @@ def generate_save_vectors(
         
         if verbose:
             print(f"  Layer {layer}: vector shape {vec.shape}")
-    t_compute_end = time.time()
     
     print(f"\nAll vectors saved to: {vector_dir}")
     print(f"Total pairs used: {num_pairs}")
-    
-    t_total_end = time.time()
-    
-    # Save cost tracking
-    if track_cost:
-        cost_data["step"] = "generate_vector_rewrite"
-        cost_data["model"] = f"{model_name}_{model_size}"
-        cost_data["data_type"] = data_type
-        cost_data["num_layers"] = len(layers)
-        cost_data["layers"] = layers
-        cost_data["total_dataset_size"] = len(dataset)
-        cost_data["valid_pairs_used"] = num_pairs
-        cost_data["skipped_samples"] = skipped_samples
-        cost_data["error_samples"] = error_samples
-        cost_data["total_forward_passes"] = num_pairs * 2
-        cost_data["total_wall_time_s"] = round(t_total_end - t_total_start, 3)
-        cost_data["activation_extraction"] = {
-            "total_time_s": round(t_extract_end - t_extract_start, 3),
-            "avg_time_per_pair_s": round(sum(forward_pass_times) / len(forward_pass_times), 3) if forward_pass_times else 0,
-            "min_time_per_pair_s": round(min(forward_pass_times), 3) if forward_pass_times else 0,
-            "max_time_per_pair_s": round(max(forward_pass_times), 3) if forward_pass_times else 0,
-        }
-        cost_data["vector_computation"] = {
-            "time_s": round(t_compute_end - t_compute_start, 3),
-        }
-        cost_data["gpu_after_inference"] = _get_gpu_memory_info()
-        cost_data["system"] = {
-            "cpu_count": psutil.cpu_count(),
-            "ram_total_GB": round(psutil.virtual_memory().total / 1024**3, 2),
-            "ram_used_GB": round(psutil.virtual_memory().used / 1024**3, 2),
-        }
-        
-        cost_json_path = os.path.join(vector_dir, "cost_generate_vector.json")
-        with open(cost_json_path, 'w', encoding='utf-8') as f:
-            json.dump(cost_data, f, ensure_ascii=False, indent=2)
-        print(f"\nCost tracking saved to: {cost_json_path}")
 
 
 def main():
@@ -537,7 +453,6 @@ def main():
         data_type=args.data_type,
         output_dir=args.output_dir,
         verbose=args.verbose,
-        track_cost=args.track_cost,
     )
 
 

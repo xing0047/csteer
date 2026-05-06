@@ -75,11 +75,11 @@ def main():
 
     # Load Data
     if args.data == "inst_it_image":
-        img_root = "../DATA/Inst-It-Dataset"
-        img_vpt_root = "../DATA/Inst-It-Dataset/images_vpt"
-        img_shuffle_root = "../DATA/Inst-It-Dataset/images_shuffle"
+        img_root = "datasets/Inst-It-Dataset"
+        img_vpt_root = "datasets/Inst-It-Dataset/images_vpt"
+        img_shuffle_root = "datasets/Inst-It-Dataset/images_shuffle"
         # Use the annotated file; the shuffle images are aligned to this ordering.
-        ann_path = "../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json"
+        ann_path = "datasets/Inst-It-Dataset/inst_it_dataset_image_51k.json"
         data = json.load(open(ann_path))[:args.n_pairs]
         data_dict = {
             'image_vpt': [],  # exact-match image path (images_vpt)
@@ -88,8 +88,8 @@ def main():
             'instruction': [],  # instruction text (same for both, requires IDs)
         }
     elif args.data == "inst_it_video":
-        vid_root = "../DATA/Inst-It-Dataset"
-        ann_path = "../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json"
+        vid_root = "datasets/Inst-It-Dataset"
+        ann_path = "datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json"
         data = json.load(open(ann_path))[:args.n_pairs]
         data_dict = {
             'video_vpt': [],

@@ -15,8 +15,8 @@ python generate_vector_gt.py \
     --data_type video \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
     --output_dir refer_gt_video_exp \
@@ -30,8 +30,8 @@ python generate_vector_gt.py \
     --data_type video \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_video_21k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
     --output_dir refer_gt_video_exp \
@@ -45,8 +45,8 @@ python generate_vector_gt.py \
     --data_type image \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/image_rollout_exp/judge_results.json \
-    --data_path ../DATA/Inst-It-Dataset/inst_it_dataset_image_51k.json \
-    --media_root ../DATA/Inst-It-Dataset \
+    --data_path datasets/Inst-It-Dataset/inst_it_dataset_image_51k.json \
+    --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --output_dir refer_gt_image_exp \
     --use_flash_attn \

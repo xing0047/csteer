@@ -13,7 +13,7 @@ Referring Multiple Regions with Large Multimodal Models via Contextual Latent St
 
 ## 🛠️ Install
 ```
-conda create -n csteer python=3.10 -y
+conda create -n csteer python=3.10
 conda activate csteer
 pip install --upgrade pip  # enable PEP 660 support
 pip install -r requirements.txt

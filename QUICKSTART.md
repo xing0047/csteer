@@ -1,5 +1,13 @@
 # Getting Started
 
+This quickstart uses:
+
+- `qwen3vl 8b` as the target model
+- `Inst-It-Image` to build steering vectors
+- `gar_detailed_image_oe_qa` as the evaluation target
+
+For a more detailed run, start by serving the judge model with vLLM, then execute the bashes under `scripts`.
+
 ## Data
 
 Make sure the data for building vectors is prepared as mentioned in DATA.md. We use `INST-IT-Image` for the example. 
@@ -108,7 +116,7 @@ Run `prompting_with_steering.py` (your "prompt_with_steering" step) to evaluate 
 ```bash
 python prompting_with_steering.py \
     --behaviors refer \
-    --type inst_it_image_oe_qa \
+    --type gar_image_detail_oe_qa \
     --model_name qwen3vl \
     --model_size 8b \
     --vector_dir refer_rewrite_image_exp \
@@ -124,8 +132,8 @@ python prompting_with_steering.py \
 Use `eval_outputs.py` to run the final judge/evaluation on generated outputs.
 
 ```bash
-python eval_outputs.py inst_it \
-    --mode image_oe \
+python eval_outputs.py gar \
+    --kind detailed \
     --input <path_to_results_json_from_prompting_with_steering> \
     --base_url http://localhost:8000/v1 \
     --model_name Qwen/Qwen2.5-72B-Instruct-AWQ

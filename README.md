@@ -17,6 +17,7 @@ conda create -n csteer python=3.10 -y
 conda activate csteer
 pip install --upgrade pip  # enable PEP 660 support
 pip install -r requirements.txt
+pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
 
 ## 🔍 Eval

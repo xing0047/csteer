@@ -1,27 +1,32 @@
-# Core ML/AI libraries - keep versions specified
-torch==2.7.1
-transformers==4.44.0
-datasets
-numpy>=1.24.0
+torch==2.7.0
+torchvision==0.22.0
+transformers==4.57.0
+datasets==3.6.0
+numpy
 scipy
 pandas
 openpyxl
 scikit-learn
 matplotlib
 seaborn
+tqdm
+Pillow
 
-# HuggingFace ecosystem
 huggingface-hub
 tokenizers
 safetensors
 
-# Development tools - keep major versions
-openai>=1.11.0
+openai==2.7.1
 jupyter
 ipython
 pytest
 
-# Core dependencies - let pip resolve
+decord
+einops
+modelscope
+pycocotools
+timm
+
 aiohttp
 aiosignal
 annotated-types

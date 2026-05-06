@@ -7,7 +7,7 @@ This guide demonstrates how to use the three-step rollout-rewrite workflow to ge
 The rollout-rewrite workflow consists of three steps:
 
 1. **Generate Rollouts** (`rollout_with_score.py`): Generate multiple rollouts for each sample and score them using a judge model
-2. **Rewrite Rollouts** (`rewrite_rollouts.py`): Rewrite low-score rollouts to improve their accuracy
+2. **Rewrite Rollouts** (`rewrite.py`): Rewrite low-score rollouts to improve their accuracy
 3. **Generate Vectors** (`generate_vector_rewrite.py`): Generate steering vectors by comparing rewritten (positive) and original (negative) rollouts
 
 ## Supported Models
@@ -146,7 +146,7 @@ This file contains:
 Rewrite rollouts with scores below the threshold to improve their accuracy.
 
 ```bash
-python rewrite_rollouts.py \
+python rewrite.py \
     --data_type ${DATA_TYPE} \
     --input_json ROLLOUT_RESULTS/${OUTPUT_DIR}/judge_results.json \
     --output_json ROLLOUT_RESULTS/${OUTPUT_DIR}/rewritten_rollouts.json \

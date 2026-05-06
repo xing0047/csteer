@@ -8,7 +8,7 @@ Supports two modes:
 2. video: video mode
 
 Example usage (image):
-python rewrite_rollouts.py \
+python rewrite.py \
     --data_type image \
     --input_json refer_rollout_exp/qwen3vl/8b/judge_results.json \
     --output_json refer_rollout_exp/qwen3vl/8b/rewritten_rollouts.json \
@@ -18,7 +18,7 @@ python rewrite_rollouts.py \
     --verbose
 
 Example usage (video):
-python rewrite_rollouts.py \
+python rewrite.py \
     --data_type video \
     --input_json ../ROLLOUT_RESULTS/video_rollout_n1024/judge_results.json \
     --output_json ../ROLLOUT_RESULTS/video_rollout_n1024/rewritten_rollouts.json \

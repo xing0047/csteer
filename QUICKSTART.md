@@ -21,7 +21,7 @@ Deploy `Qwen/Qwen2.5-72B-Instruct-AWQ` on additional GPUs as an OpenAI-compatibl
 This service is used for both:
 
 - **score** in `rollout_with_score.py`
-- **rewrite** in `eval_lhy/rewrite_rollouts.py`
+- **rewrite** in `rewrite.py`
 
 Example (use extra GPUs `4,5,6,7`):
 
@@ -44,8 +44,6 @@ Then set:
 
 Run `rollout_with_score.py` to generate multiple rollouts and scores each rollout with the judge model.
 
-### Quickstart: Qwen3-VL 8B, Image
-
 ```bash
 python rollout_with_score.py \
     --model_name qwen3vl \
@@ -61,10 +59,26 @@ python rollout_with_score.py \
     --verbose
 ```
 
+## Rewrite
+
+Run `rewrite.py` to rewrite low-score rollouts from Step 1.
+
+```bash
+python rewrite.py \
+    --data_type image \
+    --input_json ROLLOUT_RESULTS/image_rollout_exp/judge_results.json \
+    --output_json ROLLOUT_RESULTS/image_rollout_exp/rewritten_rollouts.json \
+    --judge_base_url http://localhost:8001/v1 \
+    --judge_model_name Qwen/Qwen2.5-72B-Instruct-AWQ \
+    --score_threshold 0.6 \
+    --verbose
+```
+
 ## Outputs
 
 Results are saved to:
 
 - `ROLLOUT_RESULTS/<output_dir>/judge_results.json`
 - `ROLLOUT_RESULTS/<output_dir>/judge_results.csv`
+- `ROLLOUT_RESULTS/<output_dir>/rewritten_rollouts.json`
 

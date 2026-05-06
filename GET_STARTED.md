@@ -21,7 +21,7 @@ Deploy `Qwen/Qwen2.5-72B-Instruct-AWQ` on additional GPUs as an OpenAI-compatibl
 This service is used for both:
 
 - **score** in `rollout_with_score.py`
-- **rewrite** in `eval_lhy/rewrite_rollouts.py`
+- **rewrite** in `rewrite.py`
 
 Example (use extra GPUs `4,5,6,7`):
 

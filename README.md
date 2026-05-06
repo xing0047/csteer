@@ -21,8 +21,8 @@ pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
 
 ## 🔍 Eval
-Please refer to [EVAL.md](https://github.com/xing0047/csteer/EVAL.md) for details.
-For a minimal step-by-step run, see [QUICKSTART.md](https://github.com/xing0047/csteer/QUICKSTART.md).
+Please refer to [EVAL.md](https://github.com/xing0047/csteer/blob/main/EVAL.md) for details.
+For a minimal step-by-step run, see [QUICKSTART.md](https://github.com/xing0047/csteer/blob/main/QUICKSTART.md).
 
 ## ❤️ Acknowledgement
 Thanks for their wonderful work!

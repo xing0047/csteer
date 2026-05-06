@@ -6,11 +6,11 @@ This quickstart uses:
 - `Inst-It-Image` to build steering vectors
 - `gar_detailed_image_oe_qa` as the evaluation
 
-For a more detailed run, start by serving the judge model with vLLM, then execute the bashes under `scripts`.
+For a more detailed run with different setups, start by serving the judge model with vLLM, then execute the bashes under `scripts`.
 
 ## Data
 
-Make sure the data for building vectors is prepared as mentioned in DATA.md. We use `INST-IT-Image` for the example. 
+Prepare both Inst-It data (for vector building) and GAR data (for `gar_image_detail_oe_qa` evaluation).
 
 ```text 
 datasets
@@ -18,6 +18,14 @@ datasets
 │   ├── inst_it_dataset_image_51k.json
 │   ├── images_vpt
 │   └── images_raw
+└── GAR
+    ├── GAR-Bench-Caption-Detailed.json
+    ├── detailed-images
+    │   ├── *.png
+    │   └── ...
+    └── images
+        ├── *.png
+        └── ...
 ```
 
 ## Serve

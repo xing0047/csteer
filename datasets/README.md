@@ -13,7 +13,7 @@ datasets
 │   │   └── images
 │   │       ├── *.png
 │   │       └── ...
-│   └── source_image                # optional for noref mode
+│   └── source_image
 │       ├── *.png
 │       └── ...
 ├── Inst-It-Bench
@@ -23,18 +23,18 @@ datasets
 │   ├── video_multi_choices.json
 │   ├── video_open_ended.json
 │   ├── video_instance_captions_masks.json
-│   ├── images_vpt                  # refer images
+│   ├── images_vpt
 │   │   ├── 001.jpg
 │   │   └── ...
-│   ├── images_raw                  # noref images
+│   ├── images_raw
 │   │   ├── 001.jpg
 │   │   └── ...
-│   ├── videos_vpt                  # refer frame folders
+│   ├── videos_vpt
 │   │   ├── <video_path>
 │   │   │   ├── *.jpg
 │   │   │   └── ...
 │   │   └── ...
-│   └── videos_raw                  # noref frame folders
+│   └── videos_raw
 │       ├── <video_path>
 │       │   ├── *.jpg
 │       │   └── ...
@@ -49,10 +49,10 @@ datasets
     ├── simple-images
     │   ├── *.png
     │   └── ...
-    ├── detailed-images             # refer detailed images
+    ├── detailed-images
     │   ├── *.png
     │   └── ...
-    └── images                      # noref detailed images
+    └── images
         ├── *.png
         └── ...
 ```

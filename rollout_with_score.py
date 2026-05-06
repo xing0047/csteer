@@ -2,7 +2,7 @@
 Generate rollouts for videos/images and score them.
 Generates multiple rollouts with vLLM, then uses a judge model to score them and saves results to JSON.
 
-Supported models: internvl3, internvl3_5, qwen3vl
+Supported models: internvl3_5, qwen3vl
 
 Supports two modes:
 1. image: image mode (original)
@@ -75,10 +75,10 @@ import csv
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model_name", type=str, choices=["internvl3", "internvl3_5", "qwen3vl"], default="internvl3_5"
+        "--model_name", type=str, choices=["internvl3_5", "qwen3vl"], default="internvl3_5"
     )
     parser.add_argument(
-        "--model_size", type=str, choices=["2b", "8b", "32b", "38b"]
+        "--model_size", type=str, choices=["8b"], default="8b"
     )
     parser.add_argument(
         "--data_type", type=str, choices=["image", "video"], default="video",

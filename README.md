@@ -20,8 +20,8 @@ pip install -r requirements.txt
 ```
 
 ## 🔍 Eval
-Please refer to [EVAL.md](./EVAL.md) for details.
-For a minimal step-by-step run, see [QUICKSTART.md](./QUICKSTART.md).
+Please refer to [EVAL.md](https://github.com/xing0047/csteer/EVAL.md) for details.
+For a minimal step-by-step run, see [QUICKSTART.md](https://github.com/xing0047/csteer/QUICKSTART.md).
 
 ## ❤️ Acknowledgement
 Thanks for their wonderful work!

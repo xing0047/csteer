@@ -31,10 +31,11 @@ datasets
 ## Serve
 
 Deploy `Qwen/Qwen2.5-72B-Instruct-AWQ` on additional GPUs as an OpenAI-compatible service.
-This service is used for both:
+This service is used for:
 
 - **score** in `rollout_with_score.py`
 - **rewrite** in `rewrite.py`
+- **final evaluation/judge** in `eval_outputs.py`
 
 ```bash
 python -m vllm.entrypoints.openai.api_server \

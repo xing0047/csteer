@@ -17,7 +17,7 @@ type=${4:-"inst_it_video_mc_qa"}
 #     --behaviors refer
 
 # 3. Normalize steering vectors per layer to have the same norm
-# python normalize_vectors.py \
+# python norm_vector.py \
 #     --model_name ${model_name} \
 #     --model_size ${model_size} \
 #     --n_layers ${n_layers}

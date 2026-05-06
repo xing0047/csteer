@@ -18,7 +18,7 @@ python generate.py \
 #     --model_size ${model_size} \
 #     --behaviors refer
 
-# python normalize_vectors.py \
+# python norm_vector.py \
 #     --model_name ${model_name} \
 #     --model_size ${model_size} \
 #     --n_layers ${n_layers}

@@ -1,6 +1,6 @@
 """
-Generate steering vectors for GT vs. Rollout (supports video and image).
-The vector is computed from activation differences between the official ground truth (positive) and the original incorrect rollout (negative).
+Generate steering vectors for Rewrite vs. Rollout (supports video and image).
+The vector is computed from activation differences between rewritten rollouts (positive) and the original incorrect rollouts (negative).
 
 Supported models: internvl3, internvl3_5, qwen3vl
 
@@ -9,46 +9,49 @@ Supports two modes:
 2. video: video mode
 
 Example usage (video with internvl3_5):
-python generate_vector_gt.py \
+python gen_vector.py \
     --model_name internvl3_5 \
     --model_size 8b \
     --data_type video \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
+    --rewritten_rollouts_json ./ROLLOUT_RESULTS/video_rollout_exp/rewritten_rollouts.json \
     --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
     --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
-    --output_dir refer_gt_video_exp \
+    --output_dir refer_rewrite_video_exp \
     --use_flash_attn \
     --verbose
 
 Example usage (video with qwen3vl):
-python generate_vector_gt.py \
+python gen_vector.py \
     --model_name qwen3vl \
     --model_size 8b \
     --data_type video \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/video_rollout_exp/judge_results.json \
+    --rewritten_rollouts_json ./ROLLOUT_RESULTS/video_rollout_exp/rewritten_rollouts.json \
     --data_path datasets/Inst-It-Dataset/inst_it_dataset_video_21k.json \
     --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --score_threshold 0.6 \
-    --output_dir refer_gt_video_exp \
+    --output_dir refer_rewrite_video_exp \
     --use_flash_attn \
     --verbose
 
 Example usage (image):
-python generate_vector_gt.py \
+python gen_vector.py \
     --model_name internvl3_5 \
     --model_size 8b \
     --data_type image \
     --layers $(seq 0 35) \
     --judge_results_json ./ROLLOUT_RESULTS/image_rollout_exp/judge_results.json \
+    --rewritten_rollouts_json ./ROLLOUT_RESULTS/image_rollout_exp/rewritten_rollouts.json \
     --data_path datasets/Inst-It-Dataset/inst_it_dataset_image_51k.json \
     --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
-    --output_dir refer_gt_image_exp \
+    --output_dir refer_rewrite_image_exp \
     --use_flash_attn \
     --verbose
 """
@@ -100,7 +103,11 @@ def parse_args():
     )
     parser.add_argument(
         "--judge_results_json", type=str, required=True,
-        help="Path to judge_results.json (contains original rollouts with scores and ground truth)"
+        help="Path to judge_results.json (contains original rollouts with scores)"
+    )
+    parser.add_argument(
+        "--rewritten_rollouts_json", type=str, required=True,
+        help="Path to rewritten_rollouts.json (contains rewritten rollouts)"
     )
     parser.add_argument(
         "--data_path", type=str, required=True,
@@ -125,14 +132,15 @@ def parse_args():
     return parser.parse_args()
 
 
-class GTRolloutDataset(Dataset):
-    """Dataset for loading matched GT-rollout pairs (supports image and video)"""
+class RewriteRolloutDataset(Dataset):
+    """Dataset for loading matched rewrite-rollout pairs (supports image and video)"""
     
-    def __init__(self, judge_results, data_path, media_root, 
+    def __init__(self, judge_results, rewritten_rollouts, data_path, media_root, 
                  data_type="video", score_threshold=0.6, n_samples=1024):
         """
         Args:
             judge_results: List of dicts from judge_results.json
+            rewritten_rollouts: List of dicts from rewritten_rollouts.json
             data_path: Path to dataset JSON file
             media_root: Root directory containing images_vpt or videos_vpt folder
             data_type: "image" or "video"
@@ -147,18 +155,23 @@ class GTRolloutDataset(Dataset):
         
         # Build indices
         judge_dict = {item['sample_id']: item for item in judge_results}
+        rewritten_dict = {item['sample_id']: item for item in rewritten_rollouts}
         
-        # Select first n_samples GTs (sample_id)
+        # Select first n_samples GTs (sample_id) that also exist in rewritten_dict
         sorted_sample_ids = sorted(judge_dict.keys())
+        # Filter to sample_ids that have rewrites
+        available_sample_ids = [sid for sid in sorted_sample_ids if sid in rewritten_dict]
         if n_samples > 0:
-            selected_sample_ids = sorted_sample_ids[:n_samples]
+            selected_sample_ids = available_sample_ids[:n_samples]
         else:
-            selected_sample_ids = sorted_sample_ids
+            selected_sample_ids = available_sample_ids
         
         # Match and filter: only keep the first n_samples GTs, but include all qualifying rollouts for those GTs.
         self.samples = []
         for sample_id in selected_sample_ids:
+            
             judge_item = judge_dict[sample_id]
+            rewritten_item = rewritten_dict[sample_id]
             
             media_name = judge_item.get('media_name') or judge_item.get('image_name', '')
             ground_truth = judge_item['ground_truth']
@@ -205,21 +218,29 @@ class GTRolloutDataset(Dataset):
                 if original_score > score_threshold:
                     continue
                 
-                # Use GT and rollout directly; rewritten_rollouts are not needed here.
-                self.samples.append({
-                    'sample_id': sample_id,
-                    'rollout_id': rollout_id,
-                    'media_name': media_name,
-                    'media_path': media_path,
-                    'instruction': instruction,
-                    'ground_truth': ground_truth,
-                    'original_rollout': original_text,
-                    'original_score': original_score
-                })
+                # Find corresponding rewritten rollout
+                rewritten_rollout = None
+                for r_rollout in rewritten_item['rollouts']:
+                    if r_rollout['rollout_id'] == rollout_id:
+                        rewritten_rollout = r_rollout['rollout_text']
+                        break
+                
+                if rewritten_rollout:
+                    self.samples.append({
+                        'sample_id': sample_id,
+                        'rollout_id': rollout_id,
+                        'media_name': media_name,
+                        'media_path': media_path,
+                        'instruction': instruction,
+                        'ground_truth': ground_truth,
+                        'original_rollout': original_text,
+                        'rewritten_rollout': rewritten_rollout,
+                        'original_score': original_score
+                    })
         
         # Do not truncate pair list: GT count is already limited, and all qualifying rollouts under those GTs are included.
         
-        print(f"Loaded {len(self.samples)} matched GT-rollout pairs")
+        print(f"Loaded {len(self.samples)} matched rewrite-rollout pairs")
         print(f"Data type: {data_type}")
         print(f"Score threshold: {score_threshold}")
         print(f"Number of GT samples: {len(selected_sample_ids)}")
@@ -238,14 +259,13 @@ def generate_save_vectors(
     model_name: str,
     model_size: str,
     use_flash_attn: bool,
-    dataset: GTRolloutDataset,
+    dataset: RewriteRolloutDataset,
     data_type: str,
     output_dir: str,
     verbose: bool = False,
 ):
     """
-    Generate and save steering vectors for GT vs Rollout.
-    The vector is computed as (GT activations - rollout activations).
+    Generate and save steering vectors for Rewrite vs Rollout.
     """
     behavior = REFER_VPT
     vector_dir = get_vector_dir(behavior, model_name, model_size, output_dir)
@@ -263,18 +283,18 @@ def generate_save_vectors(
     model.set_save_internal_decodings(False)
     model.reset_all()
     
-    # Note: get_tokens_for_compare will automatically add the system prompt
-    # (INST_IT_IMAGE_SYSTEM_PROMPT or INST_IT_VIDEO_SYSTEM_PROMPT).
-    
     # Store activations
-    gt_activations = dict([(layer, []) for layer in layers])
+    rewritten_rollout_activations = dict([(layer, []) for layer in layers])
     original_rollout_activations = dict([(layer, []) for layer in layers])
     
+    skipped_samples = 0
+    error_samples = 0
+
     for idx, sample in enumerate(tqdm(dataset, desc="Processing samples")):
         media_path = sample['media_path']
         instruction = sample['instruction']
         original_rollout = sample['original_rollout']
-        ground_truth = sample['ground_truth']
+        rewritten_rollout = sample['rewritten_rollout']
         
         # Check media exists
         if data_type == "video":
@@ -282,6 +302,7 @@ def generate_save_vectors(
             if len(valid_frames) == 0:
                 if verbose:
                     print(f"Warning: No valid frames for {sample['media_name']}, skipping...")
+                skipped_samples += 1
                 continue
             media_for_model = valid_frames
             media_type = "video"
@@ -289,6 +310,7 @@ def generate_save_vectors(
             if not os.path.exists(media_path):
                 if verbose:
                     print(f"Warning: Image not found: {media_path}, skipping...")
+                skipped_samples += 1
                 continue
             media_for_model = media_path
             media_type = "image"
@@ -297,32 +319,33 @@ def generate_save_vectors(
             print(f"\n[{idx+1}/{len(dataset)}] Processing: {sample['media_name']}")
             print(f"  Original score: {sample['original_score']:.2f}")
         
-        # 1. Extract positive activations (ground truth)
+        # 1. Extract positive activations (rewritten rollout)
         model.reset_all()
         try:
-            tokens_gt = model.get_tokens_for_compare(
-                media_for_model, media_type, instruction, ground_truth,
+            tokens_rewritten = model.get_tokens_for_compare(
+                media_for_model, media_type, instruction, rewritten_rollout,
                 verbose=False
             )
-            if isinstance(tokens_gt, t.Tensor):
-                tokens_gt = tokens_gt.unsqueeze(0).to(model.device)
+            if isinstance(tokens_rewritten, t.Tensor):
+                tokens_rewritten = tokens_rewritten.unsqueeze(0).to(model.device)
             else:
-                tokens_gt = t.tensor(tokens_gt, dtype=t.long).unsqueeze(0).to(model.device)
+                tokens_rewritten = t.tensor(tokens_rewritten, dtype=t.long).unsqueeze(0).to(model.device)
             
-            model.get_logits(media_for_model, media_type, tokens_gt)
+            model.get_logits(media_for_model, media_type, tokens_rewritten)
             for layer in layers:
-                gt_act = model.get_last_activations(layer)
-                if len(gt_act.shape) == 3:
-                    gt_act = gt_act.squeeze(0)
-                assert len(gt_act.shape) == 2, f"Expected 2D activations, got shape {gt_act.shape}"
-                gt_act = gt_act[-2, :].detach().cpu()
-                gt_activations[layer].append(gt_act)
+                rewritten_act = model.get_last_activations(layer)
+                if len(rewritten_act.shape) == 3:
+                    rewritten_act = rewritten_act.squeeze(0)
+                assert len(rewritten_act.shape) == 2, f"Expected 2D activations, got shape {rewritten_act.shape}"
+                rewritten_act = rewritten_act[-2, :].detach().cpu()
+                rewritten_rollout_activations[layer].append(rewritten_act)
         except Exception as e:
             if verbose:
-                print(f"Error processing ground truth: {e}")
+                print(f"Error processing rewritten rollout: {e}")
+            error_samples += 1
             continue
         
-        del tokens_gt
+        del tokens_rewritten
         model.reset_all()
         t.cuda.empty_cache()
         
@@ -349,10 +372,10 @@ def generate_save_vectors(
         except Exception as e:
             if verbose:
                 print(f"Error processing original rollout: {e}")
-            # Remove corresponding GT activations to keep list lengths aligned.
             for layer in layers:
-                if len(gt_activations[layer]) > len(original_rollout_activations[layer]):
-                    gt_activations[layer].pop()
+                if len(rewritten_rollout_activations[layer]) > len(original_rollout_activations[layer]):
+                    rewritten_rollout_activations[layer].pop()
+            error_samples += 1
             continue
         
         del tokens_original
@@ -363,9 +386,9 @@ def generate_save_vectors(
             gc.collect()
             t.cuda.empty_cache()
     
-    # 3. Compute vectors: GT - Rollout
+    # 3. Compute vectors
     print("\nComputing steering vectors...")
-    num_pairs = len(gt_activations[layers[0]])
+    num_pairs = len(rewritten_rollout_activations[layers[0]])
     print(f"Total pairs: {num_pairs}")
     
     if num_pairs == 0:
@@ -373,11 +396,10 @@ def generate_save_vectors(
         return
     
     for layer in tqdm(layers, desc="Computing vectors"):
-        all_gt = t.stack(gt_activations[layer], dim=0)
+        all_rewritten = t.stack(rewritten_rollout_activations[layer], dim=0)
         all_original = t.stack(original_rollout_activations[layer], dim=0)
         
-        # vec = mean(GT - Rollout)
-        vec = (all_gt - all_original).mean(dim=0)
+        vec = (all_rewritten - all_original).mean(dim=0)
         
         vec_path = get_vector_path(behavior, model_name, model_size, output_dir, layer)
         t.save(vec, vec_path)
@@ -393,15 +415,19 @@ def main():
     args = parse_args()
     
     # Load data
-    print("Loading judge results...")
+    print("Loading judge results and rewritten rollouts...")
     with open(args.judge_results_json, 'r', encoding='utf-8') as f:
         judge_results = json.load(f)
+    with open(args.rewritten_rollouts_json, 'r', encoding='utf-8') as f:
+        rewritten_rollouts = json.load(f)
     
     print(f"Loaded {len(judge_results)} judge results")
+    print(f"Loaded {len(rewritten_rollouts)} rewritten rollouts")
     
     # Create dataset
-    dataset = GTRolloutDataset(
+    dataset = RewriteRolloutDataset(
         judge_results=judge_results,
+        rewritten_rollouts=rewritten_rollouts,
         data_path=args.data_path,
         media_root=args.media_root,
         data_type=args.data_type,

@@ -48,7 +48,7 @@ python rollout_with_score.py \
     --media_root datasets/Inst-It-Dataset \
     --n_samples 1024 \
     --num_rollouts 8 \
-    --judge_base_url http://localhost:8001/v1 \
+    --judge_base_url http://localhost:8000/v1 \
     --judge_model_name Qwen/Qwen2.5-72B-Instruct-AWQ \
     --output_dir image_rollout_exp \
     --verbose
@@ -63,7 +63,7 @@ python rewrite.py \
     --data_type image \
     --input_json ROLLOUT_RESULTS/image_rollout_exp/judge_results.json \
     --output_json ROLLOUT_RESULTS/image_rollout_exp/rewritten_rollouts.json \
-    --judge_base_url http://localhost:8001/v1 \
+    --judge_base_url http://localhost:8000/v1 \
     --judge_model_name Qwen/Qwen2.5-72B-Instruct-AWQ \
     --score_threshold 0.6 \
     --verbose
@@ -127,7 +127,7 @@ Use `eval_outputs.py` to run the final judge/evaluation on generated outputs.
 python eval_outputs.py inst_it \
     --mode image_oe \
     --input <path_to_results_json_from_prompting_with_steering> \
-    --base_url http://localhost:8001/v1 \
+    --base_url http://localhost:8000/v1 \
     --model_name Qwen/Qwen2.5-72B-Instruct-AWQ
 ```
 

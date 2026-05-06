@@ -20,7 +20,8 @@ pip install -r requirements.txt
 ```
 
 ## 🔍 Eval
-Please refer to [Eval.md]() for details.
+Please refer to [EVAL.md](./EVAL.md) for details.
+For a minimal step-by-step run, see [QUICKSTART.md](./QUICKSTART.md).
 
 ## ❤️ Acknowledgement
 Thanks for their wonderful work!

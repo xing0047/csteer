@@ -2,17 +2,14 @@
 
 ## Data
 
-Make sure the data for building vectors is prepared as below in `datasets`. We use `INST-IT-Image` and `INST-IT-Video` for our experiments. 
+Make sure the data for building vectors is prepared as mentioned in DATA.md. We use `INST-IT-Image` for the example. 
 
 ```text 
 datasets
 ├── Inst-It-Dataset
 │   ├── inst_it_dataset_image_51k.json
-│   ├── inst_it_dataset_video_21k.json
 │   ├── images_vpt
-│   ├── images_raw
-│   ├── videos_vpt
-│   └── videos_raw
+│   └── images_raw
 ```
 
 ## Serve
@@ -23,20 +20,18 @@ This service is used for both:
 - **score** in `rollout_with_score.py`
 - **rewrite** in `rewrite.py`
 
-Example (use extra GPUs `4,5,6,7`):
-
 ```bash
-CUDA_VISIBLE_DEVICES=4,5,6,7 python -m vllm.entrypoints.openai.api_server \
+python -m vllm.entrypoints.openai.api_server \
     --model Qwen/Qwen2.5-72B-Instruct-AWQ \
     --served-model-name Qwen/Qwen2.5-72B-Instruct-AWQ \
     --tensor-parallel-size 4 \
-    --port 8001 \
+    --port 8000 \
     --dtype auto
 ```
 
 Then set:
 
-- `--judge_base_url http://localhost:8001/v1`
+- `--judge_base_url http://localhost:8000/v1`
 - `--judge_model_name Qwen/Qwen2.5-72B-Instruct-AWQ`
 
 

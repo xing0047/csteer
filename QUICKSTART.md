@@ -2,9 +2,9 @@
 
 This quickstart uses:
 
-- `qwen3vl 8b` as the target model
+- `qwen3vl` as the test model
 - `Inst-It-Image` to build steering vectors
-- `gar_detailed_image_oe_qa` as the evaluation target
+- `gar_detailed_image_oe_qa` as the evaluation
 
 For a more detailed run, start by serving the judge model with vLLM, then execute the bashes under `scripts`.
 

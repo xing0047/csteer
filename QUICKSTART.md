@@ -69,7 +69,7 @@ python rewrite.py \
     --verbose
 ```
 
-## Gen Vector
+## Vector
 
 Run `gen_vector.py` to build steering vectors from rewritten (positive) vs original rollout (negative) pairs.
 
@@ -90,7 +90,7 @@ python gen_vector.py \
     --verbose
 ```
 
-## Norm Vector
+## Norm
 
 Run `norm_vector.py` to normalize vector norms across behaviors/layers.
 
@@ -101,7 +101,7 @@ python norm_vector.py \
     --layers $(seq 0 35)
 ```
 
-## Prompt With Steering
+## Steer
 
 Run `prompting_with_steering.py` (your "prompt_with_steering" step) to evaluate steering at inference time.
 
@@ -119,7 +119,7 @@ python prompting_with_steering.py \
     --verbose
 ```
 
-## Judge Logic
+## Judge
 
 Use `eval_outputs.py` to run the final judge/evaluation on generated outputs.
 

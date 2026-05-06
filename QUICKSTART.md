@@ -118,8 +118,8 @@ python prompting_with_steering.py \
     --model_size 8b \
     --vector_dir refer_rewrite_image_exp \
     --output_dir refer_rewrite_image_exp \
-    --layers 0 \
-    --multipliers 0 1 \
+    --layers $(seq 0 35) \
+    --multipliers 1 \
     --use_flash_attn \
     --verbose
 ```
@@ -136,14 +136,4 @@ python eval_outputs.py inst_it \
     --model_name Qwen/Qwen2.5-72B-Instruct-AWQ
 ```
 
-## Outputs
-
-Results are saved to:
-
-- `ROLLOUT_RESULTS/<output_dir>/judge_results.json`
-- `ROLLOUT_RESULTS/<output_dir>/judge_results.csv`
-- `ROLLOUT_RESULTS/<output_dir>/rewritten_rollouts.json`
-- `VECTORS/<...>/layer_*.pt` (from `gen_vector.py`)
-- `NORMALIZED_VECTORS/<...>/layer_*.pt` (from `norm_vector.py`)
-- `RESULTS/<...>/results_*.json` (from `prompting_with_steering.py`)
 
